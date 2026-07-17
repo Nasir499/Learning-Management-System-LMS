@@ -7,7 +7,7 @@ const initialState = {
     subscription_id:"",
     isPaymentVerified:false,
     allPayments:{},
-    finalMonths:{},
+    finalMonth:{},
     monthlySalesRecords:[]
 };
 
@@ -17,59 +17,48 @@ export const getRazorPayId = createAsyncThunk("/razorpay/getId",async()=>{
         const response = await axiosInstance.get("payments/razorpay-key");
         return response.data;
     } catch (error) {
-        toast.error("Failed to get Razorpay API key")
+        toast.error("Failed to get Razorpay API key");
+        return error?.response?.data;
     }
 })
-export const purchaseCourseBundle = createAsyncThunk("/purchase",async()=>{
+export const purchaseCourseBundle = createAsyncThunk("/purchase",async(data)=>{
     try {
-        const response = await axiosInstance.post("payments/subscribe");
-        // console.log(response);
+        const response = await axiosInstance.post("payments/subscribe", data);
         return response.data;
     } catch (error) {
-        toast.error(error?.response?.message || "Failed to subscribe course bundle")
+        toast.error(error?.response?.data?.message || "Failed to subscribe course bundle");
+        return error?.response?.data;
     }
 })
 export const verifyUserPayment = createAsyncThunk("/payments/verify",async(data)=>{
     try {
-        console.log(data);
         const response = await axiosInstance.post("payments/verify",{
         razorpay_payment_id : data.razorpay_payment_id,
         razorpay_subscription_id : data.razorpay_subscription_id,
-        razorpay_payment_signature :data.razorpay_signature,
+        razorpay_payment_signature : data.razorpay_signature,
         })
         return response.data;
     } catch (error) {
-        toast.error(error?.response?.data?.message || "Failed to load data")
+        toast.error(error?.response?.data?.message || "Failed to load data");
+        return error?.response?.data;
     }
 })
 export const getPaymentRecords = createAsyncThunk("/payments/records",async()=>{
     try {
-        const response =  axiosInstance.get("payments?count=100", );
-        toast.promise(response, {
-            loading: "Getting Payment records...",
-            success:(data) => {
-                return data?.message
-            },
-            error: "Failed to load payments"
-        });
-        return (await response).data;
+        const response = await axiosInstance.get("payments?count=100");
+        return response.data;
     } catch (error) {
-        toast.error(error?.response?.data?.message || "Failed to load data")
+        toast.error(error?.response?.data?.message || "Failed to load data");
+        return error?.response?.data;
     }
 })
 export const cancelCourseBundle = createAsyncThunk("/payments/cancel",async()=>{
     try {
-        const response =  axiosInstance.post("payments/unsubscribe");
-        toast.promise(response, {
-            loading: "Cancelling subscription...",
-            success:(data) => {
-                return data?.message
-            },
-            error: "Failed to load payments"
-        });
-        return (await response).data;
+        const response = await axiosInstance.post("payments/unsubscribe");
+        return response.data;
     } catch (error) {
-        toast.error(error?.response?.data?.message || "Failed to load data")
+        toast.error(error?.response?.data?.message || "Failed to load data");
+        return error?.response?.data;
     }
 })
 
@@ -84,25 +73,35 @@ const razorPaySlice = createSlice({
         .addCase(getRazorPayId.fulfilled,(state,action)=>{
             state.key = action.payload?.key;
         })
+        .addCase(getRazorPayId.rejected,(state)=>{
+            state.key = "";
+        })
         .addCase(purchaseCourseBundle.fulfilled,(state,action)=>{
             state.subscription_id = action?.payload?.subscription_id;
+        })
+        .addCase(purchaseCourseBundle.rejected,(state)=>{
+            state.subscription_id = "";
         })
         .addCase(verifyUserPayment.fulfilled,(state,action)=>{
             toast.success(action?.payload?.message);
             state.isPaymentVerified = action?.payload?.success;
         })
         .addCase(verifyUserPayment.rejected,(state,action)=>{
-            toast.error(action?.payload?.message);
-            state.isPaymentVerified = action?.payload?.success;
+            toast.error(action?.payload?.message || "Payment verification failed");
+            state.isPaymentVerified = false;
         })
         .addCase(getPaymentRecords.fulfilled,(state,action)=>{
-            console.log(action);
-            
             state.allPayments = action?.payload?.allPayments;
-            state.finalMonths = action?.payload?.finalMonths;
-            state.monthlySalesRecords = action?.payload?.monthlySalesRecord;
+            state.finalMonth = action?.payload?.finalMonth;
+            state.monthlySalesRecords = action?.payload?.monthlySalesRecords;
         })
-        
+        .addCase(getPaymentRecords.rejected,(state)=>{
+            state.allPayments = {};
+            state.monthlySalesRecords = [];
+        })
+        .addCase(cancelCourseBundle.rejected,(state)=>{
+            state.subscription_id = "";
+        })
     }
 })
 

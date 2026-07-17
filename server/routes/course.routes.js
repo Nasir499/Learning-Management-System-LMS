@@ -1,15 +1,17 @@
 import {Router} from 'express';
-import { 
+import {
      createCourse,
-     createLectureToCourseById,
+     addLectureToCourseById,
      getAllCourses,
      getLecturesCourseById,
      removeCourse,
      removeLectureFromCourse,
+     uploadLectureVideo,
+     repairLectureVideo,
     } from '../controllers/course.controller.js';
 import { authorizedRoles, authorizedSubscriber, isLoggedIn } from "../middlewares/auth.middleware.js";
 import upload from '../middlewares/multer.middleware.js';
-import {  updateCourseById } from '../../../LMS/server/controllers/course.controller.js';
+import {  updateCourseById } from '../controllers/course.controller.js';
 
 const router = Router();
 
@@ -41,11 +43,18 @@ router.route('/:id')
         isLoggedIn,
         authorizedRoles("ADMIN"),
         upload.single("lecture"),
-        createLectureToCourseById
+        addLectureToCourseById
     )
     .delete(
         isLoggedIn,
         authorizedRoles("ADMIN"),
         removeCourse
     )
+
+// Upload video for an existing lecture
+router.post('/:id/lecture/:lectureId/upload', isLoggedIn, authorizedRoles('ADMIN'), upload.single('lecture'), uploadLectureVideo);
+
+// Repair a lecture's video reference. If a file is provided it will be uploaded; otherwise tries to regenerate secure_url from public_id or clears broken reference.
+router.post('/:id/lecture/:lectureId/repair', isLoggedIn, authorizedRoles('ADMIN'), upload.single('lecture'), repairLectureVideo);
+
 export default router;

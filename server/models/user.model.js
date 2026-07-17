@@ -7,15 +7,15 @@ const userSchema = new Schema({
     fullName: {
         type: String,
         required: [true, "Name is required"],
-        minLength: [3, "Atleast 3 character required"],
-        maxLength: [50, "Chota karo nam yaar"],
-        lowerCase: true,
+        minLength: [3, "At least 3 characters required"],
+        maxLength: [50, "Name must not exceed 50 characters"],
+        lowercase: true,
         trim: true,
     },
     email: {
         type: String,
         required: [true, "Email is required"],
-        lowerCase: true,
+        lowercase: true,
         trim: true,
         unique: true,
         // match: [/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/, 'Please enter a valid email address'] 
@@ -24,7 +24,7 @@ const userSchema = new Schema({
     password: {
         type: String,
         required: [true, "Password is required"],
-        minLength: [8, "Thoda achcha sa password do,minimum length 8 character"],
+        minLength: [8, "Password must be at least 8 characters long"],
         select: false
     },
     avatar: {
@@ -72,7 +72,7 @@ userSchema.methods = {
         )
     },
     comparePassword: async function (plainTextPassword) {
-        return await bcrypt.compare(this.password, plainTextPassword)
+        return await bcrypt.compare(plainTextPassword, this.password)
     },
     generatePasswordResetToken: async function name() {
         const resetToken = crypto.randomBytes(20).toString('hex')

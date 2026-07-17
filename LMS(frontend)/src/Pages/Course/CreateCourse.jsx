@@ -149,12 +149,12 @@ function CreateCourse() {
                                 <label className="text-lg font-semibold " htmlFor="category" >
                                       Course Category
                                 </label>
-                                <input 
-                                type="text" 
+                                <input
+                                type="text"
                                 required
                                 name="category"
                                 id="category"
-                                placeholder="Enter course Instructor"
+                                placeholder="Enter course Category"
                                 className="bg-transparent px-2 py-1 border "
                                 value={userInput.category}
                                 onChange={handleUserInput}
@@ -164,12 +164,12 @@ function CreateCourse() {
                                 <label className="text-lg font-semibold " htmlFor="description" >
                                       Course Description
                                 </label>
-                                <textarea 
-                                type="text" 
+                                <textarea
+                                type="text"
                                 required
                                 name="description"
                                 id="description"
-                                placeholder="Enter course Instructor"
+                                placeholder="Enter course Description"
                                 className="bg-transparent px-2 py-1 h-24 overflow-y-scroll resize-none border "
                                 value={userInput.description}
                                 onChange={handleUserInput}

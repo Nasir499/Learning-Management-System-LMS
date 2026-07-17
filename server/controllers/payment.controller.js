@@ -42,7 +42,7 @@ const buySubscribtion = async (req, res, next) => {
             subscription_id: subscription.id
         });
     } catch (error) {
-        next(new AppError("Ho66e na", 500));
+        next(new AppError("Failed to create subscription", 500));
     }
 
 }
@@ -52,8 +52,8 @@ const verifySubscription = async (req, res, next) => {
     const { razorpay_payment_id, razorpay_payment_signature, razorpay_subscription_id } = req.body;
     // console.log(razorpay_subscription_id);
     
-    if(!razorpay_payment_id || !razorpay_payment_signature || !razorpay_subscription_id){
-        return next(new AppError("Payment details are missing", 500));
+    if (!razorpay_payment_id || !razorpay_payment_signature || !razorpay_subscription_id) {
+        return next(new AppError("Payment details are missing", 400));
     }
     
     const user = await User.findById(id);

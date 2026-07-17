@@ -37,7 +37,8 @@ function AdminDashboard() {
 	const { allUserCount, subscribedCount } = useSelector(
 		(state) => state.stat
 	);
-	const { allPayments, monthlySalesRecords, finalMonth } = useSelector(
+
+	const { allPayments, monthlySalesRecords } = useSelector(
 		(state) => state.razorpay
 	);
 
@@ -58,7 +59,7 @@ function AdminDashboard() {
 	async function onCourseDelete(id) {
 		if(window.confirm("Are you sure you want to delete this course?") === false) return;
 		const res = await dispatch(deleteCourse(id));
-		if (res?.payloas?.success) {
+		if (res?.payload?.success) {
 			await dispatch(getAllCourses());
 		}
 	}
@@ -83,7 +84,7 @@ function AdminDashboard() {
 			{
 				label: "Sales/Month",
 				backgroundColor: "red",
-				data: monthlySalesRecords,
+				data: monthlySalesRecords || [],
 				borderWidth: 2,
 				borderColor: "white",
 			},
@@ -96,7 +97,7 @@ function AdminDashboard() {
 			await dispatch(getStatData());
 			await dispatch(getPaymentRecords());
 		})();
-	}, []);
+	}, [dispatch]);
 
 	return (
 		<HomeLayout>
@@ -152,7 +153,7 @@ function AdminDashboard() {
 										Subscription Count
 									</p>
 									<h3 className="text-4xl font-bold">
-										{allPayments.count}
+										{allPayments?.count || 0}
 									</h3>
 								</div>
 								<FcSalesPerformance className="text-yellow-500 text-5xl" />
@@ -163,7 +164,7 @@ function AdminDashboard() {
 										Total Revenue
 									</p>
 									<h3 className="text-4xl font-bold">
-										{allPayments?.count * 499}
+										{(allPayments?.count || 0) * 499}
 									</h3>
 								</div>
 								<GiMoneyStack className="text-green-500 text-5xl" />
@@ -198,23 +199,21 @@ function AdminDashboard() {
 							</tr>
 						</thead>
 						<tbody>
-							{myCourses.map((course, index) => (
+							{myCourses?.map((course, index) => (
 								<tr key={course._id}>
 									<td>{index + 1}</td>
 									<td>
-										<textarea
-											readOnly
-											value={course?.title}
-											className="w-40 h-auto bg-transparent resize-none"></textarea>
+										<div className="w-40 break-words">
+											{course?.title}
+										</div>
 									</td>
 									<td>{course?.category}</td>
 									<td>{course?.createdBy}</td>
 									<td>{course?.numberoflectures}</td>
 									<td>
-										<textarea
-											readOnly
-											value={course?.description}
-											className="w-40 h-auto bg-transparent resize-none"></textarea>
+										<div className="w-40 break-words">
+											{course?.description}
+										</div>
 									</td>
 									<td className="flex items-center gap-4">
 										<button

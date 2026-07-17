@@ -2,7 +2,7 @@ import { createAsyncThunk, createSlice } from "@reduxjs/toolkit"
 import axiosInstance from "../../Helpers/axiosinstance"
 import toast from "react-hot-toast"
 
-const initialSate ={
+const initialState ={
     allUserCount:0,
     subscribedCount:0
 }
@@ -17,13 +17,13 @@ export const getStatData = createAsyncThunk("/stat/get",async()=>{
         })
         return (await res).data;
     } catch (error) {
-        toast.error(error?.res?.data?.message)
+        toast.error(error?.response?.data?.message)
     }
 })
 
 const statSlice = createSlice({
     name:"stat",
-    initialState:initialSate,
+    initialState:initialState,
     reducers:{},
     extraReducers:(builder)=>{
         builder

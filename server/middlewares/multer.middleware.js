@@ -3,28 +3,27 @@ import path from "path"
 import multer from "multer"
 
 
+const DEFAULT_MAX_UPLOAD_BYTES = 1024 * 1024 * 1024; // 1 GB
+const maxUploadBytes = process.env.MAX_UPLOAD_BYTES ? parseInt(process.env.MAX_UPLOAD_BYTES, 10) : DEFAULT_MAX_UPLOAD_BYTES;
+
 const upload = multer({
-  dest:"upload/",
-  limits:{fileSize:500*1024*1024},
-  storage:multer.diskStorage({
-    destination:"uploads/",
-    filename:(_req,file,cb)=>{
-       cb(null,file.originalname);
+  // keep dest for backward compatibility, storage.destination will be used
+  dest: "uploads/",
+  limits: { fileSize: maxUploadBytes },
+  storage: multer.diskStorage({
+    destination: "uploads/",
+    filename: (_req, file, cb) => {
+      cb(null, file.originalname);
     }
   }),
-  fileFilter:(_req,file,cb)=>{
-    let ext = path.extname(file.originalname);
-    if(
-      ext !==".jpg" &&
-      ext !==".jpeg" &&
-      ext !==".webp" &&
-      ext !==".png" &&
-      ext !==".mp4"
-     ){
-        cb(new Error(`Unsupported file type! ${ext}`),false)
-        return
-     }
-     cb(null,true)
+  fileFilter: (_req, file, cb) => {
+    let ext = path.extname(file.originalname).toLowerCase();
+    const allowed = ['.jpg', '.jpeg', '.webp', '.png', '.mp4', '.mov', '.webm', '.mkv'];
+    if (!allowed.includes(ext)) {
+      cb(new Error(`Unsupported file type! ${ext}`), false);
+      return;
+    }
+    cb(null, true);
   }
 })
 

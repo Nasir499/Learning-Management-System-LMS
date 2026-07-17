@@ -1,8 +1,10 @@
-import  { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
+import { useDispatch, useSelector } from 'react-redux'
+import { useLocation, useNavigate } from 'react-router-dom'
+
 import HomeLayout from '../../Layouts/HomeLayout'
-import { useLocation, useNavigate } from 'react-router-dom';
-import { useDispatch, useSelector } from 'react-redux';
-import { deleteCourseLectures, getCourseLectures } from '../../Redux/Slices/LectureSlice';
+import { deleteCourseLectures, getCourseLectures } from '../../Redux/Slices/LectureSlice'
+
 
 function Displaylectures() {
   const navigate = useNavigate();
@@ -20,9 +22,9 @@ function Displaylectures() {
 
 
   useEffect(() => {
-    if (!state) { navigate("/courses"); }
+    if (!state) { navigate("/courses"); return; }
     dispatch(getCourseLectures(state._id))
-  }, [])
+  }, [dispatch, navigate, state])
 
 
   return (
@@ -37,15 +39,21 @@ function Displaylectures() {
         (<div className='flex justify-center gap-10 w-full'>
           {/* Left section for playing video */}
           <div className='w-2/3 flex ml-20 flex-col gap-5 shadow-[0_0_10px_black]'>
-              <video
-                src={lectures && lectures[currentVideo]?.video?.secure_url}
-                className='object-fill rounded-tl-lg rounded-tr-lg w-full'
-                controls
-                autoPlay
-                controlsList='nodownload'
-                disablePictureInPicture
-              >
-              </video>
+              {lectures && lectures[currentVideo]?.video?.secure_url ? (
+                <video
+                  src={lectures[currentVideo].video.secure_url}
+                  className='object-fill rounded-tl-lg rounded-tr-lg w-full'
+                  controls
+                  autoPlay
+                  controlsList='nodownload'
+                  disablePictureInPicture
+                />
+              ) : (
+                <div className='w-full h-80 flex items-center justify-center bg-gray-800 rounded-tl-lg rounded-tr-lg'>
+                  <p className='text-center text-gray-300'>Video not available for this lecture.</p>
+                </div>
+              )}
+
               <div>
                 <h1>
                   <span className='text-yellow-500'>
@@ -78,29 +86,41 @@ function Displaylectures() {
               lectures.map((lecture, idx) => {
                 return (
                 <li className='space-y-2 w-[100%] ' key={lecture._id}>
-                  <p className='cursor-pointer' onClick={() => setCurrentVideo(idx)}>
-                    <span className=' bg-transparent text-white font-semibold py-1 rounded-lg'>
-                      <span className='text-pink-500'>{" "} Lecture {idx + 1} : {" "}</span>
+              <div className='flex items-center justify-between'>
+                <p className='cursor-pointer' onClick={() => setCurrentVideo(idx)}>
+                  <span className=' bg-transparent text-white font-semibold py-1 rounded-lg'>
+                    <span className='text-pink-500'>{" "} Lecture {idx + 1} : {" "}</span>
                     {lecture.title}
-                    </span>
+                  </span>
+                </p>
+                <div className='flex items-center gap-2'>
                   {role === "ADMIN" && (
-                    <button onClick={()=>onLectureDelete(state._id, lecture._id)} className='w-[8rem] bg-red-200 text-black font-semibold py-1 rounded-lg hover:bg-red-400 duration-300 bottom-0 cursor-pointer ml-1 inline'>
-                      Delete Lecture
-                    </button>
+                    <>
+                      <button onClick={() => {
+                        if (window.confirm('Delete this lecture? This action cannot be undone.')) {
+                          onLectureDelete(state._id, lecture._id)
+                        }
+                      }} className='w-[8rem] bg-red-200 text-black font-semibold py-1 rounded-lg hover:bg-red-400 duration-300 bottom-0 cursor-pointer ml-1 inline'>
+                        Delete Lecture
+                      </button>
+
+                    </>
                   )}
-                  </p>
-                </li>
-                )
-              }
-              )
+                </div>
+              </div>
+            </li>
+            )
+          }
+          )
             }
           </ul>
-        </div>):( role === "ADMIN") && (
+        </div>):
+        (role === "ADMIN" && (
                 <button onClick={()=>navigate(`/course/addlecture`,{state:{...state}})} className=' bg-green-500 text-black flex flex-col items-center justify-center  hover:bg-green-600 duration-300 bottom-0  px-0.5 py-1 rounded-md font-semibold text-sm cursor-pointer  btn-primary'>
                   Add New Lecture
                 </button>
-              )}
-
+              ))
+        }
       </div>
     </HomeLayout>
   )

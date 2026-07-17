@@ -1,10 +1,21 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import toast from "react-hot-toast";
+
 import axiosInstance from "../../Helpers/axiosinstance.js"
+const parseStoredData = () => {
+    try {
+        const raw = localStorage.getItem('data')
+        if (!raw || raw === 'undefined' || raw === 'null') return {}
+        return JSON.parse(raw)
+    } catch {
+        return {}
+    }
+}
+
 const initialState = {
-    isLoggedIn: localStorage.getItem('isLoggedIn') || false,
+    isLoggedIn: localStorage.getItem('isLoggedIn') === 'true',
     role: localStorage.getItem('role') || "",
-    data: localStorage.getItem('data') != undefined ? localStorage.getItem('data') : {}
+    data: parseStoredData()
 }
 
 
@@ -70,6 +81,7 @@ export const updateProfile = createAsyncThunk("/user/update", async (data) => {
             },
             error: "Failed to Update Profile"
         })
+        return (await res).data
     } catch (error) {
         toast.error(error?.response?.data?.message)
     }
@@ -89,6 +101,14 @@ const authSlice = createSlice({
     reducers: {},
     extraReducers: (builder) => {
         builder
+        .addCase(createAccount.fulfilled, (state, action) => {
+            localStorage.setItem('data', JSON.stringify(action?.payload?.user))
+            localStorage.setItem('isLoggedIn', true)
+            localStorage.setItem('role', action?.payload?.user?.role)
+            state.isLoggedIn = true,
+                state.data = action?.payload?.user,
+                state.role = action?.payload?.user?.role
+        })
         .addCase(login.fulfilled, (state, action) => {
             localStorage.setItem('data', JSON.stringify(action?.payload?.user))
             localStorage.setItem('isLoggedIn', true)
@@ -97,7 +117,7 @@ const authSlice = createSlice({
                 state.data = action?.payload?.user,
                 state.role = action?.payload?.user?.role
         })
-        .addCase(logout.fulfilled, (state, action) => {
+        .addCase(logout.fulfilled, (state) => {
                 localStorage.clear()
                 state.data = {}
                 state.isLoggedIn = false

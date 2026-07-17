@@ -1,8 +1,10 @@
 import { useState } from "react";
-import HomeLayout from "../Layouts/HomeLayout"
 import toast from "react-hot-toast";
+
+import axiosInstance from "../Helpers/axiosinstance";
 import { isEmail } from "../Helpers/regexMatcher";
-import axios from "axios";
+import HomeLayout from "../Layouts/HomeLayout"
+
 function Contact() {
   const [userInput,setUserInput] = useState({
     name: "",
@@ -26,12 +28,12 @@ function Contact() {
       return;
     }
 
-    // if(isEmail(userInput.email)){
-    //   toast.error("Please enter a valid email address");
-    //   return
-    // }
+    if (!isEmail(userInput.email)) {
+      toast.error("Please enter a valid email address");
+      return;
+    }
     try {
-      const response =  axios.post("http://localhost:8000/api/v1/contact", userInput)
+      const response = axiosInstance.post("/contact", userInput)
       toast.promise(response, {
         loading: "Sending...",
         success: "Message sent successfully!",
@@ -45,7 +47,7 @@ function Contact() {
           message: ""
         })
       }
-    } catch (error) {
+    } catch {
       toast.error("Failed to send message. Please try again later."); 
     }
   }

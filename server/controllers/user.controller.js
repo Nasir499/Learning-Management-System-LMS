@@ -20,7 +20,7 @@ const register = async (req, res, next) => {
     }
     const userExists = await User.findOne({ email })
     if (userExists) {
-      return new AppError("Tum to pehle se ho", 400);
+      return next(new AppError("Tum to pehle se ho", 400));
     }
 
     const user = await User.create({
@@ -33,7 +33,7 @@ const register = async (req, res, next) => {
       }
     })
     if (!user) {
-      return new AppError("User registration failes, please try again", 400)
+      return next(new AppError("User registration failes, please try again", 400))
     }
     //todo file upload
     // console.log("file details", req.file);
@@ -61,7 +61,10 @@ const register = async (req, res, next) => {
         }
 
       } catch (error) {
-        return next(new AppError(error.message || "File not uploaded, please try again", 500))
+        console.error('Avatar upload failed:', error);
+        const httpCode = error && (error.http_code || error.statusCode || error.status) ? (error.http_code || error.statusCode || error.status) : 500;
+        const message = httpCode === 413 ? 'Uploaded avatar file too large' : (error && error.message) ? error.message : 'File not uploaded, please try again';
+        return next(new AppError(message, httpCode));
       }
     }
 
@@ -185,7 +188,6 @@ const forgotPassword = async (req, res, next) => {
     await user.save()
     return next(new AppError(error.message, 400))
   }
-  next()
 }
 
 const resetPassword = async (req, res, next) => {
@@ -207,7 +209,7 @@ const resetPassword = async (req, res, next) => {
 
   user.forgotPasswordExpiry = undefined;
   user.forgotPasswordToken = undefined;
-  user.save();
+  await user.save();
 
 
   res.status(200).json({
@@ -257,6 +259,10 @@ const updateUser = async (req, res,next) => {
   const { fullName } = req.body;
   const { id } = req.params;
 
+  if (req.user.role !== 'ADMIN' && req.user.id !== id) {
+    return next(new AppError("Unauthorized to update this user", 403));
+  }
+
   const user = await User.findById(id)
 
   if (!user) {
@@ -269,9 +275,8 @@ const updateUser = async (req, res,next) => {
 
   if(req.file){
     await cloudinary.v2.uploader.destroy(user.avatar.public_id);
-  }
 
-   try {
+    try {
         const result = await cloudinary.v2.uploader.upload(req.file.path, {
           folder: "LMS",
           width: 250,
@@ -292,18 +297,20 @@ const updateUser = async (req, res,next) => {
         }
 
       } catch (error) {
-        return next(new AppError(error.message || "File not uploaded, please try again", 500))
-      }
-
-
-      await user.save()
-
-      res.status(200).json({
-        success:true,
-        message:"User details updated successfully"
-      })
-
+      console.error('Avatar update failed:', error);
+      const httpCode = error && (error.http_code || error.statusCode || error.status) ? (error.http_code || error.statusCode || error.status) : 500;
+      const message = httpCode === 413 ? 'Uploaded avatar file too large' : (error && error.message) ? error.message : 'File not uploaded, please try again';
+      return next(new AppError(message, httpCode));
+    }
   }
+
+  await user.save()
+
+  res.status(200).json({
+    success:true,
+    message:"User details updated successfully"
+  })
+}
 
 export {
   register,

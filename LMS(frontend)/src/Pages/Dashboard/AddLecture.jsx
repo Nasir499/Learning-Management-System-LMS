@@ -1,17 +1,26 @@
-import  { useEffect, useState } from 'react'
-import HomeLayout from '../../Layouts/HomeLayout'
+import { useEffect, useState } from 'react'
+import toast from 'react-hot-toast'
+import { AiOutlineArrowLeft } from 'react-icons/ai'
+import { useDispatch } from 'react-redux'
 import { useLocation, useNavigate } from 'react-router-dom'
-import { useDispatch } from 'react-redux';
-import { addCourseLectures } from '../../Redux/Slices/LectureSlice';
-import { AiOutlineArrowLeft } from 'react-icons/ai';
-import toast from 'react-hot-toast';
+
+import HomeLayout from '../../Layouts/HomeLayout'
+import { addCourseLectures } from '../../Redux/Slices/LectureSlice'
 
 function AddLecture() {
     const courseDetails = useLocation();
-    
+
     const dispatch = useDispatch();
     const navigate = useNavigate();
 
+    const [isUploading, setIsUploading] = useState(false);
+    const [uploadProgress, setUploadProgress] = useState({
+        progress: 0,
+        bytesUploaded: 0,
+        totalBytes: 0,
+        uploadSpeed: 0,
+        estimatedTimeRemaining: 0
+    });
 
     const [userInput,setUserInput] = useState({
         id:courseDetails.state._id,
@@ -34,12 +43,34 @@ function AddLecture() {
         const video = e.target.files[0];
         const src = window.URL.createObjectURL(video);
         console.log(src);
-        
+
         setUserInput({
             ...userInput,
             lecture:video,
             videoSrc:src
         })
+    }
+
+    function formatBytes(bytes) {
+        if (bytes === 0) return '0 Bytes';
+        const k = 1024;
+        const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
+    }
+
+    function formatSpeed(bytesPerSecond) {
+        return formatBytes(bytesPerSecond) + '/s';
+    }
+
+    function formatTime(seconds) {
+        if (seconds < 60) {
+            return Math.round(seconds) + 's';
+        } else if (seconds < 3600) {
+            return Math.round(seconds / 60) + 'm ' + Math.round(seconds % 60) + 's';
+        } else {
+            return Math.round(seconds / 3600) + 'h ' + Math.round((seconds % 3600) / 60) + 'm';
+        }
     }
 
     async function onFormSubmit(event){
@@ -48,22 +79,40 @@ function AddLecture() {
             toast.error("Please fill in all fields");
             return;
         }
-       const response =  await dispatch(addCourseLectures(userInput));
+
+        setIsUploading(true);
+
+        const response = await dispatch(addCourseLectures({
+            ...userInput,
+            onProgress: (progress) => {
+                setUploadProgress(progress);
+            }
+        }));
+
+        setIsUploading(false);
+
         if(response?.payload?.success) {
             navigate(-1)
             setUserInput({
-        id:courseDetails.id,
-        lecture:undefined,
-        title:"",
-        description:"",
-        videoSrc:""
-       })
+                id:courseDetails.state._id,
+                lecture:undefined,
+                title:"",
+                description:"",
+                videoSrc:""
+            })
+            setUploadProgress({
+                progress: 0,
+                bytesUploaded: 0,
+                totalBytes: 0,
+                uploadSpeed: 0,
+                estimatedTimeRemaining: 0
+            })
         }
     }
 
     useEffect(()=>{
         if(!courseDetails) navigate("/courses");
-    },[])
+    },[courseDetails, navigate])
 
   return (
     <HomeLayout>
@@ -75,47 +124,76 @@ function AddLecture() {
                     </button>
                     <h1 className='text-xl text-yellow-500 font-semibold '>Add Lecture</h1>
                 </header>
-                <form 
+                <form
                 onSubmit={onFormSubmit}
                 className='flex flex-col gap-3'
                 >
-                    <input 
-                    type="text" 
+                    <input
+                    type="text"
                     name='title'
                     onChange={handleInputChange}
                     value={userInput.title}
                     placeholder='Title'
                     className='p-2 rounded-md bg-slate-800'
+                    disabled={isUploading}
                     />
-                    <textarea 
-                    type="text" 
+                    <textarea
+                    type="text"
                     name='description'
                     onChange={handleInputChange}
                     value={userInput.description}
                     placeholder='Description'
                     className='p-2 rounded-md bg-slate-800 resize-none h-40 overflow-auto'
+                    disabled={isUploading}
                     />
                     {userInput.videoSrc ?(
-                        <video
-                        src={userInput.videoSrc}
-                        controls
-                        className='w-full h-50 object-cover'
-                        ></video>
+                        <div className='flex flex-col gap-3'>
+                            <video
+                            src={userInput.videoSrc}
+                            controls
+                            className='w-full h-50 object-cover'
+                            ></video>
+                            {isUploading && (
+                                <div className='flex flex-col gap-2'>
+                                    <div className='w-full bg-gray-600 rounded-full h-2 overflow-hidden'>
+                                        <div
+                                            className='bg-green-500 h-full transition-all duration-300'
+                                            style={{ width: `${uploadProgress.progress}%` }}
+                                        ></div>
+                                    </div>
+                                    <div className='flex justify-between text-xs text-gray-300'>
+                                        <span>{uploadProgress.progress}% • {formatBytes(uploadProgress.bytesUploaded)} / {formatBytes(uploadProgress.totalBytes)}</span>
+                                        <span>{formatSpeed(uploadProgress.uploadSpeed)}</span>
+                                    </div>
+                                    <div className='text-xs text-gray-400 text-center'>
+                                        {uploadProgress.progress >= 95 ? 'Processing video...' : `ETA: ${formatTime(uploadProgress.estimatedTimeRemaining)}`}
+                                    </div>
+                                </div>
+                            )}
+                        </div>
                     )
                     :(
                         <div className='h-48 border flex items-center justify-center cursor-pointer'>
                             <label htmlFor="lecture" className='font-semibold text-xl cursor-pointer'>Choose Video</label>
-                            <input 
-                            onChange={handleVideo} 
+                            <input
+                            onChange={handleVideo}
                             type="file"
                             className='hidden'
                             name='lecture'
                             id='lecture'
+                            accept="video/*"
+                            disabled={isUploading}
                             />
                         </div>
                     )
                     }
-                    <button type='submit' className='p-2 bg-green-500 rounded-md cursor-pointer hover:bg-green-600 transition-all ease-in-out duration-300'>Add</button>
+                    <button
+                        type='submit'
+                        className='p-2 bg-green-500 rounded-md cursor-pointer hover:bg-green-600 transition-all ease-in-out duration-300 disabled:bg-gray-600 disabled:cursor-not-allowed'
+                        disabled={isUploading}
+                    >
+                        {isUploading ? 'Uploading...' : 'Add'}
+                    </button>
 
                 </form>
             </div>

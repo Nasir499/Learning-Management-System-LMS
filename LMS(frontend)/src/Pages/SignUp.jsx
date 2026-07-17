@@ -64,11 +64,10 @@ function SignUp() {
             toast.error("Invalid email id")
             return
         }
-
-        // if(!isValidPassword(signUpData.password)){
-        //     toast.error("Password should be 6 to 16 character long with at least a number and a special character")
-        //     return;
-        // }
+        if(!isValidPassword(signUpData.password)){
+            toast.error("Password should be 6 to 16 character long with at least a number and a special character")
+            return;
+        }
         const formData = new FormData();
         formData.append("fullName",signUpData.fullName)
         formData.append("email",signUpData.email)

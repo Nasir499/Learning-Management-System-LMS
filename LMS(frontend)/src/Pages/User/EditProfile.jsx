@@ -10,11 +10,12 @@ import { AiOutlineArrowLeft } from "react-icons/ai";
 function EditProfile() {
     const dispatch = useDispatch()
     const navigate = useNavigate()
+    const userId = useSelector((state)=>state?.auth?.data?._id)
     const [data,setData] = useState({
         previewImage:"",
         fullName:"",
         avatar:undefined,
-        userId:useSelector((state)=>state?.auth?.data?._id)
+        userId:userId
     });
     function handleImageUpload(e){
         e.preventDefault();

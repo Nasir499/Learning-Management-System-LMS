@@ -1,5 +1,6 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit"
 import toast from "react-hot-toast"
+
 import axiosInstance from "../../Helpers/axiosinstance"
 
 const initialState = {
@@ -20,23 +21,56 @@ export const getCourseLectures = createAsyncThunk("/course/lecture/get", async (
         toast.error(error?.response?.data?.message)
     }
 })
+
 export const addCourseLectures = createAsyncThunk("/course/lecture/add", async (data) => {
     try {
         const formData = new FormData();
         formData.append("lecture", data.lecture);
         formData.append("title", data.title);
         formData.append("description", data.description);
-        const response = axiosInstance.post(`/course/${data.id}`,formData);
-        toast.promise(response, {
-            loading: "Adding Lectures...",
-            success: "Lectures Added successfully",
-            error: "Failed to Add Lectures",
+
+        const startTime = Date.now();
+        const totalBytes = data.lecture.size;
+
+        const response = axiosInstance.post(`/course/${data.id}`, formData, {
+            onUploadProgress: (progressEvent) => {
+                const bytesUploaded = progressEvent.loaded;
+
+                // Some environments/servers don't provide progressEvent.total (chunked transfer).
+                // Fall back to the known file size supplied by the client (totalBytes).
+                const total = progressEvent.total || totalBytes || 0;
+
+                // Protect against division by zero / NaN
+                let progress = 0;
+                if (total > 0) {
+                    progress = Math.round((bytesUploaded / total) * 100);
+                    progress = Math.min(progress, 95); // reserve last % for server processing
+                }
+
+                const elapsedSeconds = Math.max((Date.now() - startTime) / 1000, 0.001); // avoid divide by zero
+                const uploadSpeed = bytesUploaded / elapsedSeconds;
+                const remainingBytes = Math.max(total - bytesUploaded, 0);
+                const estimatedTimeRemaining = uploadSpeed > 0 ? Math.max(remainingBytes / uploadSpeed, 0) : 0;
+
+                if (data.onProgress) {
+                    data.onProgress({
+                        progress,
+                        bytesUploaded,
+                        totalBytes: total,
+                        uploadSpeed,
+                        estimatedTimeRemaining
+                    });
+                }
+            }
         });
+
         return (await response).data
     } catch (error) {
         toast.error(error?.response?.data?.message)
+        throw error;
     }
 })
+
 export const deleteCourseLectures = createAsyncThunk("/course/lecture/delete", async (data) => {
     try {
 
@@ -65,7 +99,7 @@ const lectureSlice = createSlice({
             .addCase(addCourseLectures.fulfilled, (state, action) => {
                 state.lectures = action?.payload?.course?.lectures
             })
-           
+
     }
 })
 
