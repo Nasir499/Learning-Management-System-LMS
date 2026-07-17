@@ -8,6 +8,7 @@ import {
      removeLectureFromCourse,
      uploadLectureVideo,
      repairLectureVideo,
+     attachLectureMetadata
     } from '../controllers/course.controller.js';
 import { authorizedRoles, authorizedSubscriber, isLoggedIn } from "../middlewares/auth.middleware.js";
 import upload from '../middlewares/multer.middleware.js';
@@ -44,6 +45,13 @@ router.route('/:id')
         authorizedRoles("ADMIN"),
         upload.single("lecture"),
         addLectureToCourseById
+    )
+    // Attach lecture metadata when client has uploaded file directly to Cloudinary
+    .post(
+        ":id/attach",
+        isLoggedIn,
+        authorizedRoles("ADMIN"),
+        attachLectureMetadata
     )
     .delete(
         isLoggedIn,

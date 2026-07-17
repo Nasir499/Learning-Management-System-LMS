@@ -6,6 +6,7 @@ import { useLocation, useNavigate } from 'react-router-dom'
 
 import HomeLayout from '../../Layouts/HomeLayout'
 import { addCourseLectures } from '../../Redux/Slices/LectureSlice'
+import { uploadToCloudinaryDirect } from '../../Helpers/cloudinaryDirect'
 
 function AddLecture() {
     const courseDetails = useLocation();
@@ -82,16 +83,51 @@ function AddLecture() {
 
         setIsUploading(true);
 
-        const response = await dispatch(addCourseLectures({
-            ...userInput,
-            onProgress: (progress) => {
-                setUploadProgress(progress);
+        try {
+            // If file is large, use direct client-to-Cloudinary upload to avoid server payload limits
+            const LARGE_FILE_THRESHOLD = 100 * 1024 * 1024; // 100 MB
+            let attachResult = null;
+
+            if (userInput.lecture && userInput.lecture.size > LARGE_FILE_THRESHOLD) {
+                // 1) upload directly to Cloudinary
+                const cloudResult = await uploadToCloudinaryDirect(userInput.lecture, 'lms');
+                // 2) tell server to attach metadata to course
+                const attachResp = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:8000'}/api/v1/course/${userInput.id}/attach`, {
+                    method: 'POST',
+                    credentials: 'include',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ title: userInput.title, description: userInput.description, public_id: cloudResult.public_id, secure_url: cloudResult.secure_url })
+                });
+                const attachJson = await attachResp.json();
+                if (!attachResp.ok) throw new Error(attachJson?.message || `Attach failed with status ${attachResp.status}`);
+                attachResult = attachJson;
+            } else {
+                // Use existing server upload path which reports progress
+                const response = await dispatch(addCourseLectures({
+                    ...userInput,
+                    onProgress: (progress) => {
+                        setUploadProgress(progress);
+                    }
+                }));
+
+                if (response?.error) {
+                    // Thunk was rejected
+                    const errMsg = response.error?.message || 'Upload failed';
+                    toast.error(errMsg);
+                    setIsUploading(false);
+                    return;
+                }
+
+                attachResult = response?.payload;
+                if (!attachResult?.success) {
+                    toast.error(attachResult?.message || 'Upload failed');
+                    setIsUploading(false);
+                    return;
+                }
             }
-        }));
 
-        setIsUploading(false);
-
-        if(response?.payload?.success) {
+            // success
+            toast.success('Lecture added successfully');
             navigate(-1)
             setUserInput({
                 id:courseDetails.state._id,
@@ -107,6 +143,14 @@ function AddLecture() {
                 uploadSpeed: 0,
                 estimatedTimeRemaining: 0
             })
+
+        } catch (err) {
+            // Friendly error messages for common server errors
+            const msg = err?.message || 'Failed to upload lecture';
+            toast.error(msg);
+            console.error('Add lecture error:', err);
+        } finally {
+            setIsUploading(false);
         }
     }
 

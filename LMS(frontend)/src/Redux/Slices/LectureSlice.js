@@ -22,7 +22,7 @@ export const getCourseLectures = createAsyncThunk("/course/lecture/get", async (
     }
 })
 
-export const addCourseLectures = createAsyncThunk("/course/lecture/add", async (data) => {
+export const addCourseLectures = createAsyncThunk("/course/lecture/add", async (data, { rejectWithValue }) => {
     try {
         const formData = new FormData();
         formData.append("lecture", data.lecture);
@@ -66,8 +66,9 @@ export const addCourseLectures = createAsyncThunk("/course/lecture/add", async (
 
         return (await response).data
     } catch (error) {
-        toast.error(error?.response?.data?.message)
-        throw error;
+        const errMsg = error?.response?.data?.message || error.message || 'Upload failed';
+        toast.error(errMsg)
+        return rejectWithValue({ message: errMsg, status: error?.response?.status });
     }
 })
 

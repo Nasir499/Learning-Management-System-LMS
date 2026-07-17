@@ -264,6 +264,34 @@ const addLectureToCourseById = async (req, res, next) => {
   });
 }
 
+// Attach metadata for a lecture when the file was uploaded directly to Cloudinary from the client
+const attachLectureMetadata = async (req, res, next) => {
+  try {
+  const { title, description, public_id, secure_url } = req.body;
+  const { id } = req.params;
+
+  if (!title || !description || !public_id || !secure_url) {
+    return next(new AppError('Title, description, public_id and secure_url are required', 400));
+  }
+
+  const course = await Course.findById(id);
+  if (!course) return next(new AppError('Invalid course id or course not found.', 400));
+
+  course.lectures.push({
+    title,
+    description,
+    video: { public_id, secure_url }
+  });
+
+  course.numberoflectures = course.lectures.length;
+  await course.save();
+
+  return res.status(200).json({ success: true, message: 'Lecture attached successfully', course });
+  } catch (err) {
+  return next(new AppError(err.message || 'Failed to attach lecture metadata', 500));
+  }
+};
+
  const removeLectureFromCourse = async (req, res, next) => {
   // Grabbing the courseId and lectureId from req.query
   const { courseId, lectureId } = req.query;
@@ -488,5 +516,6 @@ export {
     addLectureToCourseById,
     removeLectureFromCourse,
     uploadLectureVideo,
-    repairLectureVideo
+    repairLectureVideo,
+    attachLectureMetadata
 }
