@@ -1,13 +1,14 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit"
-import axiosInstance from "../../Helpers/axiosinstance"
 import toast from "react-hot-toast"
+
+import axiosInstance from "../../Helpers/axiosinstance"
 
 const initialState ={
     allUserCount:0,
     subscribedCount:0
 }
 
-export const getStatData = createAsyncThunk("/stat/get",async()=>{
+export const getStatData = createAsyncThunk("/stat/get",async(_, { rejectWithValue })=>{
     try {
         const res =  axiosInstance.get("/admin/stats/users")
         toast.promise(res,{
@@ -17,7 +18,9 @@ export const getStatData = createAsyncThunk("/stat/get",async()=>{
         })
         return (await res).data;
     } catch (error) {
-        toast.error(error?.response?.data?.message)
+        const msg = error?.response?.data?.message || "Failed to get statistics";
+        toast.error(msg);
+        return rejectWithValue(msg);
     }
 })
 

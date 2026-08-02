@@ -3,14 +3,22 @@ import AppError from "../utils/error.util.js";
 import cloudinary from "cloudinary";
 import fs from "fs";
 
-// Helper to upload a local file to Cloudinary using upload_stream (works for large files)
+// Helper to upload a local file to Cloudinary using upload_large (supports chunked uploads for large video files)
 const uploadFileToCloudinary = (filePath, options = {}) => {
   return new Promise((resolve, reject) => {
-    const stream = cloudinary.v2.uploader.upload_stream(options, (error, result) => {
-      if (error) return reject(error);
-      resolve(result);
-    });
-    fs.createReadStream(filePath).pipe(stream);
+    cloudinary.v2.uploader.upload_large(
+      filePath,
+      {
+        chunk_size: 6000000,
+        resource_type: options.resource_type || 'auto',
+        folder: options.folder || 'lms',
+        ...options
+      },
+      (error, result) => {
+        if (error) return reject(error);
+        resolve(result);
+      }
+    );
   });
 };
 
@@ -27,7 +35,13 @@ const mapCloudinaryError = (err) => {
 
 
 
-
+/**
+ * 
+ * @param {*} req 
+ * @param {*} res 
+ * @param {*} next 
+ * @returns list of courses
+ */
 const getAllCourses = async (req, res, next) => {
     try {
         const courses = await Course.find({}).select("-lectures");
@@ -41,7 +55,13 @@ const getAllCourses = async (req, res, next) => {
     }
 
 }
-
+/**
+ * 
+ * @param {*} req 
+ * @param {*} res 
+ * @param {*} next 
+ * @returns 
+ */
 const getLecturesCourseById = async (req, res, next) => {
 
     const { id } = req.params;
@@ -55,7 +75,7 @@ const getLecturesCourseById = async (req, res, next) => {
                 message: "Course not found"
             });
         }
-
+        
         res.status(200).json({
             success: true,
             message: "Course lectures fetched successfully",
@@ -154,17 +174,40 @@ const updateCourseById = async (req, res, next) => {
 }
 
 const removeCourse = async (req, res, next) => {
-    // Implementation for removing a course
-    // This function is not defined in the provided code snippet
-    // You can add your logic here
     try {
         const { id } = req.params;
 
-        const course = await Course.findByIdAndDelete(id);
+        const course = await Course.findById(id);
 
         if (!course) {
             return next(new AppError("Course not found", 404));
         }
+
+        // Destroy course thumbnail from Cloudinary
+        if (course.thumbnail && course.thumbnail.public_id && course.thumbnail.public_id !== "dummy") {
+            try {
+                await cloudinary.v2.uploader.destroy(course.thumbnail.public_id);
+            } catch (err) {
+                console.error("Failed to delete thumbnail from Cloudinary:", err);
+            }
+        }
+
+        // Destroy all lecture videos from Cloudinary
+        if (course.lectures && course.lectures.length > 0) {
+            for (const lecture of course.lectures) {
+                if (lecture.video && lecture.video.public_id) {
+                    try {
+                        await cloudinary.v2.uploader.destroy(lecture.video.public_id, {
+                            resource_type: "video"
+                        });
+                    } catch (err) {
+                        console.error("Failed to delete lecture video from Cloudinary:", err);
+                    }
+                }
+            }
+        }
+
+        await Course.findByIdAndDelete(id);
 
         res.status(200).json({
             success: true,
@@ -226,23 +269,22 @@ const addLectureToCourseById = async (req, res, next) => {
         lectureData.secure_url = result.secure_url;
       } else {
         try {
-          const resource = await cloudinary.v2.api.resource(publicId, { resource_type: 'video' });
-          lectureData.secure_url = resource && resource.secure_url ? resource.secure_url : cloudinary.v2.url(publicId, { resource_type: 'video', secure: true });
+          const resource = await cloudinary.v2.api.resource(publicId, { resource_type: resourceType });
+          lectureData.secure_url = resource && resource.secure_url ? resource.secure_url : cloudinary.v2.url(publicId, { resource_type: resourceType, secure: true });
         } catch (err) {
           console.warn('Could not fetch resource metadata from Cloudinary:', err && err.message);
-          lectureData.secure_url = cloudinary.v2.url(publicId, { resource_type: 'video', secure: true });
+          lectureData.secure_url = cloudinary.v2.url(publicId, { resource_type: resourceType, secure: true });
         }
       }
-
-      // remove local file
-      fs.rm(`uploads/${req.file.filename}`, (error) => {
-        if (error) {
-          console.error('Failed to delete file :', error)
-        }
-      })
     } catch (error) {
-      console.error('Lecture upload failed:', error)
+      console.error('Lecture upload failed:', error);
       return next(mapCloudinaryError(error));
+    } finally {
+      if (req.file) {
+        fs.rm(req.file.path, (error) => {
+          if (error) console.error('Failed to delete temp file:', error);
+        });
+      }
     }
   }
 

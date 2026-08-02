@@ -1,10 +1,11 @@
+import { useEffect } from "react";
+import toast from "react-hot-toast";
 import { useDispatch, useSelector } from "react-redux"
-import HomeLayout from "../../Layouts/HomeLayout";
 import { Link } from "react-router-dom";
+
+import HomeLayout from "../../Layouts/HomeLayout";
 import { getProfile } from "../../Redux/Slices/AuthSlice";
 import { cancelCourseBundle } from "../../Redux/Slices/RazorpaySlice";
-import toast from "react-hot-toast";
-import { useEffect } from "react";
 
 function Profile() {
   const dispatch = useDispatch();
@@ -37,7 +38,7 @@ function Profile() {
                         <p>Subscription:</p><p>{userData?.subscription?.status === "active" ? "Active" : "Inactive"}</p>
                     </div>
                     <div className="flex items-center justify-between mt-4 gap-2">
-                        <Link to="/changepassword" className="w-1/2 bg-yellow-600 hover:bg-yellow-500 transition-all ease-in-out duration-300 rounded-sm font-semibold py-2 cursor-pointer text-center">
+                        <Link to="/user/changepassword" className="w-1/2 bg-yellow-600 hover:bg-yellow-500 transition-all ease-in-out duration-300 rounded-sm font-semibold py-2 cursor-pointer text-center">
                           <button>Change Password</button>
                         </Link>
                         <Link to="/user/editprofile" className="w-1/2 bg-yellow-600 hover:bg-yellow-500 transition-all ease-in-out duration-300 rounded-sm font-semibold py-2 cursor-pointer text-center">

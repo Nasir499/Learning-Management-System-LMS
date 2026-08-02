@@ -1,7 +1,9 @@
 import { Router } from "express";
-import { allPayments, buySubscribtion, cancelSubscription, getRazorpayKey, verifySubscription } from "../controllers/payment.controller.js";
+import { allPayments, buySubscribtion, cancelSubscription, getRazorpayKey, razorpayWebhook, verifySubscription } from "../controllers/payment.controller.js";
 import {isLoggedIn,authorizedRoles} from "../middlewares/auth.middleware.js";
 const router = Router();
+
+router.route('/webhook').post(razorpayWebhook);
 
 router.route('/razorpay-key')
     .get(

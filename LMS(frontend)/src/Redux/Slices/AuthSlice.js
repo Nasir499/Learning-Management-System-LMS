@@ -19,7 +19,7 @@ const initialState = {
 }
 
 
-export const createAccount = createAsyncThunk("/auth/signup", async (data) => {
+export const createAccount = createAsyncThunk("/auth/signup", async (data, { rejectWithValue }) => {
     try {
         const res = axiosInstance.post("user/register", data)
         toast.promise(res, {
@@ -31,14 +31,14 @@ export const createAccount = createAsyncThunk("/auth/signup", async (data) => {
         })
 
         return (await res).data
-
-
     } catch (error) {
-        toast.error(error?.response?.data?.message)
+        const message = error?.response?.data?.message || "Failed to create account";
+        toast.error(message);
+        return rejectWithValue(message);
     }
 })
 
-export const login = createAsyncThunk("/auth/login", async (data) => {
+export const login = createAsyncThunk("/auth/login", async (data, { rejectWithValue }) => {
     try {
         const res = axiosInstance.post("user/login", data)
         toast.promise(res, {
@@ -50,14 +50,14 @@ export const login = createAsyncThunk("/auth/login", async (data) => {
         })
 
         return (await res).data
-
-
     } catch (error) {
-        toast.error(error?.response?.data?.message)
+        const message = error?.response?.data?.message || "Failed to login";
+        toast.error(message);
+        return rejectWithValue(message);
     }
 })
 
-export const logout = createAsyncThunk("/auth/logout", async () => {
+export const logout = createAsyncThunk("/auth/logout", async (_, { rejectWithValue }) => {
     try {
         const res = axiosInstance.get("user/logout")
         toast.promise(res, {
@@ -67,31 +67,38 @@ export const logout = createAsyncThunk("/auth/logout", async () => {
             },
             error: "Failed to logout"
         })
+        return (await res).data
     } catch (error) {
-        toast.error(error?.response?.data?.message)
+        const message = error?.response?.data?.message || "Failed to logout";
+        toast.error(message);
+        return rejectWithValue(message);
     }
 })
-export const updateProfile = createAsyncThunk("/user/update", async (data) => {
+export const updateProfile = createAsyncThunk("/user/update", async (data, { rejectWithValue }) => {
     try {
         const res = axiosInstance.put(`user/update/${data[0]}`, data[1])
         toast.promise(res, {
             loading: "Wait! Profile update in progress",
             success: (data) => {
-                return data?.message
+                return data?.data?.message || "Profile updated successfully"
             },
             error: "Failed to Update Profile"
         })
         return (await res).data
     } catch (error) {
-        toast.error(error?.response?.data?.message)
+        const message = error?.response?.data?.message || "Failed to Update Profile";
+        toast.error(message);
+        return rejectWithValue(message);
     }
 })
-export const getProfile = createAsyncThunk("/user/details", async () => {
+export const getProfile = createAsyncThunk("/user/details", async (_, { rejectWithValue }) => {
     try {
         const res = await axiosInstance.get(`user/me`)
         return res.data
     } catch (error) {
-        toast.error(error.message)
+        const message = error?.response?.data?.message || error.message || "Failed to get profile";
+        toast.error(message);
+        return rejectWithValue(message);
     }
 })
 

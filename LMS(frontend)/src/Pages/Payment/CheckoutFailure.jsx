@@ -1,5 +1,6 @@
-import HomeLayout from '../../Layouts/HomeLayout'
 import { Link } from 'react-router-dom'
+
+import HomeLayout from '../../Layouts/HomeLayout'
 
 function CheckoutFailure() {
   return (

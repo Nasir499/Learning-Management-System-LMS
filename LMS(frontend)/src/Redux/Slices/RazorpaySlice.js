@@ -1,5 +1,6 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit"
 import toast from "react-hot-toast"
+
 import  axiosInstance  from "../../Helpers/axiosinstance"
 
 const initialState = {
@@ -12,25 +13,25 @@ const initialState = {
 };
 
 
-export const getRazorPayId = createAsyncThunk("/razorpay/getId",async()=>{
+export const getRazorPayId = createAsyncThunk("/razorpay/getId",async(_, { rejectWithValue })=>{
     try {
         const response = await axiosInstance.get("payments/razorpay-key");
         return response.data;
     } catch (error) {
         toast.error("Failed to get Razorpay API key");
-        return error?.response?.data;
+        return rejectWithValue(error?.response?.data);
     }
 })
-export const purchaseCourseBundle = createAsyncThunk("/purchase",async(data)=>{
+export const purchaseCourseBundle = createAsyncThunk("/purchase",async(data, { rejectWithValue })=>{
     try {
         const response = await axiosInstance.post("payments/subscribe", data);
         return response.data;
     } catch (error) {
         toast.error(error?.response?.data?.message || "Failed to subscribe course bundle");
-        return error?.response?.data;
+        return rejectWithValue(error?.response?.data);
     }
 })
-export const verifyUserPayment = createAsyncThunk("/payments/verify",async(data)=>{
+export const verifyUserPayment = createAsyncThunk("/payments/verify",async(data, { rejectWithValue })=>{
     try {
         const response = await axiosInstance.post("payments/verify",{
         razorpay_payment_id : data.razorpay_payment_id,
@@ -40,25 +41,25 @@ export const verifyUserPayment = createAsyncThunk("/payments/verify",async(data)
         return response.data;
     } catch (error) {
         toast.error(error?.response?.data?.message || "Failed to load data");
-        return error?.response?.data;
+        return rejectWithValue(error?.response?.data);
     }
 })
-export const getPaymentRecords = createAsyncThunk("/payments/records",async()=>{
+export const getPaymentRecords = createAsyncThunk("/payments/records",async(_, { rejectWithValue })=>{
     try {
         const response = await axiosInstance.get("payments?count=100");
         return response.data;
     } catch (error) {
         toast.error(error?.response?.data?.message || "Failed to load data");
-        return error?.response?.data;
+        return rejectWithValue(error?.response?.data);
     }
 })
-export const cancelCourseBundle = createAsyncThunk("/payments/cancel",async()=>{
+export const cancelCourseBundle = createAsyncThunk("/payments/cancel",async(_, { rejectWithValue })=>{
     try {
         const response = await axiosInstance.post("payments/unsubscribe");
         return response.data;
     } catch (error) {
         toast.error(error?.response?.data?.message || "Failed to load data");
-        return error?.response?.data;
+        return rejectWithValue(error?.response?.data);
     }
 })
 

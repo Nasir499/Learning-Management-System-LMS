@@ -1,10 +1,10 @@
-import HomeLayout from '../Layouts/HomeLayout'
 import aboutMainImage from "../Assets/aboutMainImage.png"
 import apj from "../Assets/apj.png"
 import billGates from "../Assets/billGates.png"
 import einstein from "../Assets/einstein.png"
 import nelsonMandela from "../Assets/nelsonMandela.png"
 import steveJobs from "../Assets/steveJobs.png"
+import HomeLayout from '../Layouts/HomeLayout'
 function AboutUs() {
     return (
         <HomeLayout>

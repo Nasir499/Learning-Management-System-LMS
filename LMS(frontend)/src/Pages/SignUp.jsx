@@ -1,11 +1,12 @@
 import { useState } from 'react'
-import HomeLayout from '../Layouts/HomeLayout'
-import { BsPersonCircle } from 'react-icons/bs'
-import { Link, useNavigate } from 'react-router-dom'
-import { useDispatch } from 'react-redux'
 import toast from 'react-hot-toast'
-import { createAccount } from '../Redux/Slices/AuthSlice'
+import { BsPersonCircle } from 'react-icons/bs'
+import { useDispatch } from 'react-redux'
+import { Link, useNavigate } from 'react-router-dom'
+
 import { isEmail, isValidPassword } from '../Helpers/regexMatcher'
+import HomeLayout from '../Layouts/HomeLayout'
+import { createAccount } from '../Redux/Slices/AuthSlice'
 
 function SignUp() {
     const dispatch = useDispatch();

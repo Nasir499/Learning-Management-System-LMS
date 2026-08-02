@@ -9,7 +9,7 @@ import bcrypt from "bcrypt"
 const cookieOptions = {
   maxAge: 7 * 24 * 60 * 60 * 1000,
   httpOnly: true,
-  secure: true
+  secure: process.env.NODE_ENV === 'production'
 }
 
 const register = async (req, res, next) => {
@@ -20,7 +20,7 @@ const register = async (req, res, next) => {
     }
     const userExists = await User.findOne({ email })
     if (userExists) {
-      return next(new AppError("Tum to pehle se ho", 400));
+      return next(new AppError("Email is already registered", 400));
     }
 
     const user = await User.create({
@@ -33,7 +33,7 @@ const register = async (req, res, next) => {
       }
     })
     if (!user) {
-      return next(new AppError("User registration failes, please try again", 400))
+      return next(new AppError("User registration failed, please try again", 400))
     }
     //todo file upload
     // console.log("file details", req.file);
@@ -98,7 +98,13 @@ const login = async (req, res,next) => {
       email
     }).select('+password')
 
-    if (!user || !user.comparePassword(password)) {
+    if (!user) {
+      return next(new AppError("Email or password does not match", 400))
+    }
+
+    const isPasswordValid = await user.comparePassword(password);
+
+    if (!isPasswordValid) {
       return next(new AppError("Email or password does not match", 400))
     }
 
@@ -158,7 +164,7 @@ const forgotPassword = async (req, res, next) => {
   const user = await User.findOne({ email })
 
   if (!user) {
-    return next(new AppError("Email not registered", 500))
+    return next(new AppError("Email not registered", 404))
   }
 
   const resetToken = await user.generatePasswordResetToken();
@@ -191,7 +197,11 @@ const forgotPassword = async (req, res, next) => {
 }
 
 const resetPassword = async (req, res, next) => {
-  const { resetToken } = req.params;
+  const resetToken = req.params.resetToken || req.params.resetId;
+
+  if (!resetToken) {
+    return next(new AppError("Reset token is missing", 400));
+  }
 
   const { password } = req.body;
   const forgotPasswordToken = crypto.createHash('sha256').update(resetToken).digest('hex')

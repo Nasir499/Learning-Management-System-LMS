@@ -87,6 +87,13 @@ const verifySubscription = async (req, res, next) => {
     
     await user.save();
 
+    const token = await user.generateJWTToken();
+    res.cookie('token', token, {
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production'
+    });
+
     res.status(200).json({
         success: true,
         message: "Subscription verified successfully",
@@ -128,11 +135,32 @@ const cancelSubscription = async (req, res, next) => {
 export const allPayments = async (req, res, _next) => {
   const { count, skip } = req.query;
 
-  // Find all subscriptions from razorpay
-  const allPayments = await razorpay.subscriptions.all({
-    count: count ? count : 10, // If count is sent then use that else default to 10
-    skip: skip ? skip : 0, // // If skip is sent then use that else default to 0
+  const subscriptions = await razorpay.subscriptions.all({
+    count: count ? count : 100, // Default to 100
+    skip: skip ? skip : 0,
   });
+
+  const currentYear = new Date().getFullYear();
+  
+  // Filter out unpaid subscriptions and only include the current year's data for the chart
+  const activeSubscriptions = subscriptions.items.filter((payment) => {
+    // Check if the subscription actually generated revenue
+    const isPaid = payment.status === 'active' || payment.status === 'completed' || 
+                   (payment.status === 'cancelled' && payment.paid_count > 0);
+    if (!isPaid) return false;
+    
+    // Only include subscriptions from the current year
+    const startYear = payment.start_at ? new Date(payment.start_at * 1000).getFullYear() : null;
+    return startYear === currentYear;
+  });
+
+  // Get total successful payments from DB for accurate revenue calculation
+  const totalPayments = await Payment.countDocuments();
+
+  const allPayments = {
+    count: totalPayments,
+    items: activeSubscriptions,
+  };
 
   const monthNames = [
     'January',
@@ -190,8 +218,50 @@ export const allPayments = async (req, res, _next) => {
     message: 'All payments',
     allPayments,
     finalMonths,
-    monthlySalesRecord,
+    monthlySalesRecords: monthlySalesRecord,
   });
+};
+
+export const razorpayWebhook = async (req, res, next) => {
+  try {
+    const webhookSecret = process.env.RAZORPAY_WEBHOOK_SECRET || 'secret123';
+    const signature = req.headers['x-razorpay-signature'];
+
+    if (!signature) {
+      return next(new AppError('Webhook signature missing', 400));
+    }
+
+    const expectedSignature = crypto
+      .createHmac('sha256', webhookSecret)
+      .update(JSON.stringify(req.body))
+      .digest('hex');
+
+    if (expectedSignature !== signature) {
+      return next(new AppError('Invalid webhook signature', 400));
+    }
+
+    const { event, payload } = req.body;
+
+    if (event === 'subscription.charged' || event === 'payment.captured') {
+      const paymentEntity = payload.payment.entity;
+      const subscriptionId = paymentEntity.subscription_id;
+      const email = paymentEntity.email;
+
+      if (email) {
+        const user = await User.findOne({ email });
+        if (user) {
+          user.subscription.status = 'active';
+          if (subscriptionId) user.subscription.id = subscriptionId;
+          await user.save();
+        }
+      }
+    }
+
+    return res.status(200).json({ success: true, message: 'Webhook processed successfully' });
+  } catch (error) {
+    console.error('Razorpay Webhook Error:', error);
+    return next(new AppError('Webhook processing failed', 500));
+  }
 };
 
 export {

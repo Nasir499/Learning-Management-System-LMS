@@ -7,7 +7,7 @@ const initialState = {
     courseData: []
 }
 
-export const getAllCourses = createAsyncThunk("/course/get", async () => {
+export const getAllCourses = createAsyncThunk("/course/get", async (_, { rejectWithValue }) => {
     try {
         const response = axiosInstance.get("course");
         toast.promise(response, {
@@ -18,11 +18,13 @@ export const getAllCourses = createAsyncThunk("/course/get", async () => {
 
         return (await response).data.courses;
     } catch(error) {
-        toast.error(error?.response?.data?.message);
+        const msg = error?.response?.data?.message || "Failed to get courses";
+        toast.error(msg);
+        return rejectWithValue(msg);
     }
 }); 
 
-export const deleteCourse = createAsyncThunk("/course/delete", async (id) => {
+export const deleteCourse = createAsyncThunk("/course/delete", async (id, { rejectWithValue }) => {
     try {
         const response = axiosInstance.delete(`course/${id}`);
         toast.promise(response, {
@@ -33,11 +35,13 @@ export const deleteCourse = createAsyncThunk("/course/delete", async (id) => {
 
         return (await response).data;
     } catch(error) {
-        toast.error(error?.response?.data?.message);
+        const msg = error?.response?.data?.message || "Failed to delete course";
+        toast.error(msg);
+        return rejectWithValue(msg);
     }
 }); 
 
-export const createNewCourse = createAsyncThunk("/course/create", async (data) => {
+export const createNewCourse = createAsyncThunk("/course/create", async (data, { rejectWithValue }) => {
     try {
         let formData = new FormData();
         formData.append("title", data?.title);
@@ -54,9 +58,10 @@ export const createNewCourse = createAsyncThunk("/course/create", async (data) =
         });
 
         return (await response).data
-
     } catch(error) {
-        toast.error(error?.response?.data?.message);
+        const msg = error?.response?.data?.message || "Failed to create course";
+        toast.error(msg);
+        return rejectWithValue(msg);
     }
 });
 

@@ -13,7 +13,8 @@ const upload = multer({
   storage: multer.diskStorage({
     destination: "uploads/",
     filename: (_req, file, cb) => {
-      cb(null, file.originalname);
+      const uniquePrefix = Date.now() + '-' + Math.round(Math.random() * 1e6);
+      cb(null, uniquePrefix + '-' + file.originalname);
     }
   }),
   fileFilter: (_req, file, cb) => {

@@ -4,9 +4,9 @@ import { AiOutlineArrowLeft } from 'react-icons/ai'
 import { useDispatch } from 'react-redux'
 import { useLocation, useNavigate } from 'react-router-dom'
 
+import { uploadToCloudinaryDirect } from '../../Helpers/cloudinaryDirect'
 import HomeLayout from '../../Layouts/HomeLayout'
 import { addCourseLectures } from '../../Redux/Slices/LectureSlice'
-import { uploadToCloudinaryDirect } from '../../Helpers/cloudinaryDirect'
 
 function AddLecture() {
     const courseDetails = useLocation();
@@ -42,6 +42,10 @@ function AddLecture() {
 
     function handleVideo(e){
         const video = e.target.files[0];
+        if (!video) return;
+        if (userInput.videoSrc) {
+            window.URL.revokeObjectURL(userInput.videoSrc);
+        }
         const src = window.URL.createObjectURL(video);
         console.log(src);
 
@@ -85,14 +89,18 @@ function AddLecture() {
 
         try {
             // If file is large, use direct client-to-Cloudinary upload to avoid server payload limits
-            const LARGE_FILE_THRESHOLD = 100 * 1024 * 1024; // 100 MB
+            const LARGE_FILE_THRESHOLD = 10 * 1024 * 1024; // 10 MB
             let attachResult = null;
 
             if (userInput.lecture && userInput.lecture.size > LARGE_FILE_THRESHOLD) {
                 // 1) upload directly to Cloudinary
-                const cloudResult = await uploadToCloudinaryDirect(userInput.lecture, 'lms');
+                const cloudResult = await uploadToCloudinaryDirect(userInput.lecture, 'lms', (progress) => {
+                    setUploadProgress(progress);
+                });
                 // 2) tell server to attach metadata to course
-                const attachResp = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:8000'}/api/v1/course/${userInput.id}/attach`, {
+                const rawApiBase = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+                const cleanBase = rawApiBase.replace(/\/api\/v1\/?$/, '');
+                const attachResp = await fetch(`${cleanBase}/api/v1/course/${userInput.id}/attach`, {
                     method: 'POST',
                     credentials: 'include',
                     headers: { 'Content-Type': 'application/json' },
@@ -112,7 +120,7 @@ function AddLecture() {
 
                 if (response?.error) {
                     // Thunk was rejected
-                    const errMsg = response.error?.message || 'Upload failed';
+                    const errMsg = response.payload?.message || response.error?.message || 'Upload failed';
                     toast.error(errMsg);
                     setIsUploading(false);
                     return;

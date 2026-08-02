@@ -115,11 +115,16 @@ function Displaylectures() {
             }
           </ul>
         </div>):
-        (role === "ADMIN" && (
-                <button onClick={()=>navigate(`/course/addlecture`,{state:{...state}})} className=' bg-green-500 text-black flex flex-col items-center justify-center  hover:bg-green-600 duration-300 bottom-0  px-0.5 py-1 rounded-md font-semibold text-sm cursor-pointer  btn-primary'>
-                  Add New Lecture
-                </button>
-              ))
+        (
+          <div className='flex flex-col items-center justify-center gap-6 py-20'>
+            <p className='text-center text-gray-300 text-lg'>No lectures available for this course yet.</p>
+            {role === "ADMIN" && (
+              <button onClick={()=>navigate(`/course/addlecture`,{state:{...state}})} className=' bg-green-500 text-black flex flex-col items-center justify-center  hover:bg-green-600 duration-300 bottom-0  px-4 py-2 rounded-md font-semibold text-sm cursor-pointer  btn-primary'>
+                Add New Lecture
+              </button>
+            )}
+          </div>
+        )
         }
       </div>
     </HomeLayout>

@@ -8,7 +8,7 @@ const initialState = {
 }
 
 
-export const getCourseLectures = createAsyncThunk("/course/lecture/get", async (cid) => {
+export const getCourseLectures = createAsyncThunk("/course/lecture/get", async (cid, { rejectWithValue }) => {
     try {
         const response = axiosInstance.get(`/course/${cid}`);
         toast.promise(response, {
@@ -18,7 +18,9 @@ export const getCourseLectures = createAsyncThunk("/course/lecture/get", async (
         });
         return (await response).data
     } catch (error) {
-        toast.error(error?.response?.data?.message)
+        const msg = error?.response?.data?.message || "Failed to get lectures";
+        toast.error(msg);
+        return rejectWithValue(msg);
     }
 })
 
@@ -72,7 +74,7 @@ export const addCourseLectures = createAsyncThunk("/course/lecture/add", async (
     }
 })
 
-export const deleteCourseLectures = createAsyncThunk("/course/lecture/delete", async (data) => {
+export const deleteCourseLectures = createAsyncThunk("/course/lecture/delete", async (data, { rejectWithValue }) => {
     try {
 
         const response = axiosInstance.delete(`/course?courseId=${data.courseId}&lectureId=${data.lectureId}`);
@@ -83,7 +85,9 @@ export const deleteCourseLectures = createAsyncThunk("/course/lecture/delete", a
         });
         return (await response).data
     } catch (error) {
-        toast.error(error?.response?.data?.message)
+        const msg = error?.response?.data?.message || "Failed to delete lecture";
+        toast.error(msg);
+        return rejectWithValue(msg);
     }
 })
 

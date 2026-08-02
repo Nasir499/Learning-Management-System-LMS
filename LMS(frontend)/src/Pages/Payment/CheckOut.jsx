@@ -1,21 +1,18 @@
 import { useEffect } from 'react';
+import toast from 'react-hot-toast';
+import { BiRupee } from "react-icons/bi";
 import { useDispatch, useSelector } from 'react-redux'
 import { useNavigate } from 'react-router-dom';
-import { getRazorPayId, purchaseCourseBundle, verifyUserPayment } from '../../Redux/Slices/RazorpaySlice';
-import toast from 'react-hot-toast';
+
 import HomeLayout from '../../Layouts/HomeLayout';
-import { BiRupee } from "react-icons/bi";
+import { getRazorPayId, purchaseCourseBundle, verifyUserPayment } from '../../Redux/Slices/RazorpaySlice';
 
 function CheckOut() {
 
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const razorPayKey = useSelector((state) => state?.razorpay?.key);
-  // console.log(razorPayKey);
   const subscription_id = useSelector((state) => state?.razorpay?.subscription_id);
-  // console.log(subscription_id);
-
-  const isPaymentVerified = useSelector((state) => state?.razorpay?.isPaymentVerified);
   const userData = useSelector((state) => state?.auth?.data);
   const paymentDetails = {
     razorpay_payment_id: "",
@@ -65,13 +62,13 @@ function CheckOut() {
 
   }
 
-  async function load() {
-    await dispatch(getRazorPayId());
-    await dispatch(purchaseCourseBundle())
-  }
   useEffect(() => {
-    load()
-  }, [])
+    dispatch(getRazorPayId());
+    // Only create a new subscription if one isn't already pending
+    if (!subscription_id) {
+      dispatch(purchaseCourseBundle());
+    }
+  }, [dispatch, subscription_id])
   return (
     <HomeLayout>
       <form

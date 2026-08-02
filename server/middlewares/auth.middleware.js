@@ -1,5 +1,6 @@
 import jwt from "jsonwebtoken";
 import AppError from "../utils/error.util.js";
+import User from "../models/user.model.js";
 
 const isLoggedIn = async (req, res, next) => {
     const { token } = req.cookies;
@@ -25,8 +26,15 @@ const authorizedRoles = (...roles)=>async (req, res, next) => {
 
 }
 const authorizedSubscriber = async (req, res, next) => {
-  const subscriptionStatus = req.user.subscription?.status;
+  let subscriptionStatus = req.user.subscription?.status;
   const currUser = req.user.role;
+
+  if (currUser !== 'ADMIN' && subscriptionStatus !== 'active') {
+      const user = await User.findById(req.user.id);
+      if (user && user.subscription?.status === 'active') {
+          subscriptionStatus = 'active';
+      }
+  }
 
   if (currUser !== 'ADMIN' && subscriptionStatus !== 'active') {
       return next(new AppError("Unauthorized, You don't have permission to access this resource", 403));

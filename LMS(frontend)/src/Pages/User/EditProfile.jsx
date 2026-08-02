@@ -1,64 +1,71 @@
-import { use, useEffect, useState } from "react"
+import { useState } from "react";
 import toast from "react-hot-toast";
-import { useDispatch, useSelector } from "react-redux"
-import { getProfile, updateProfile } from "../../Redux/Slices/AuthSlice";
-import { Link, useNavigate } from "react-router-dom";
-import HomeLayout from "../../Layouts/HomeLayout";
-import { BsPersonCircle } from 'react-icons/bs'
 import { AiOutlineArrowLeft } from "react-icons/ai";
+import { BsPersonCircle } from 'react-icons/bs';
+import { useDispatch, useSelector } from "react-redux";
+import { Link, useNavigate } from "react-router-dom";
+
+import HomeLayout from "../../Layouts/HomeLayout";
+import { getProfile, updateProfile } from "../../Redux/Slices/AuthSlice";
 
 function EditProfile() {
-    const dispatch = useDispatch()
-    const navigate = useNavigate()
-    const userId = useSelector((state)=>state?.auth?.data?._id)
-    const [data,setData] = useState({
-        previewImage:"",
-        fullName:"",
-        avatar:undefined,
-        userId:userId
+    const dispatch = useDispatch();
+    const navigate = useNavigate();
+    const userData = useSelector((state) => state?.auth?.data);
+    const userId = userData?._id;
+
+    const [data, setData] = useState({
+        previewImage: userData?.avatar?.secure_url || "",
+        fullName: userData?.fullName || "",
+        avatar: undefined,
+        userId: userId
     });
-    function handleImageUpload(e){
+
+    function handleImageUpload(e) {
         e.preventDefault();
-        const uploadImage = e.target.files[0]
-        if(uploadImage){
+        const uploadImage = e.target.files[0];
+        if (uploadImage) {
             const fileReader = new FileReader();
-            fileReader.readAsDataURL(uploadImage)
-            fileReader.addEventListener('load',function(){
+            fileReader.readAsDataURL(uploadImage);
+            fileReader.addEventListener('load', function () {
                 setData({
                     ...data,
-                    previewImage:this.result,
-                    avatar:uploadImage
-
-                })
-            })
+                    previewImage: this.result,
+                    avatar: uploadImage
+                });
+            });
         }
     }
-    function handleInputChange(e){
-        const {name,value} = e.target
+
+    function handleInputChange(e) {
+        const { name, value } = e.target;
         setData({
             ...data,
-            [name]:value
-        })
+            [name]: value
+        });
     }
-    async function onFormSubmit(e){
-        e.preventDefault()
-        
-        if(!data.fullName || !data.avatar){
-            toast.error("All fileds are mandatory")
-            return
+
+    async function onFormSubmit(e) {
+        e.preventDefault();
+
+        if (!data.fullName) {
+            toast.error("Name field is mandatory");
+            return;
         }
-        if(data.fullName.length < 3  ){
-            toast.error("Name should have at least 3 characters")
-            return
+        if (data.fullName.length < 3) {
+            toast.error("Name should have at least 3 characters");
+            return;
         }
         const formData = new FormData();
-        formData.append("fullName",data.fullName)
-        formData.append("avatar",data.avatar)
-        await dispatch(updateProfile([data.userId,formData]));
+        formData.append("fullName", data.fullName);
+        if (data.avatar) {
+            formData.append("avatar", data.avatar);
+        }
 
+        await dispatch(updateProfile([data.userId, formData]));
         await dispatch(getProfile());
         navigate("/user/profile");
-     }
+    }
   
   return (
     <HomeLayout>

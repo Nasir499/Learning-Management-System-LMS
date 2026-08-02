@@ -1,25 +1,26 @@
-import { useDispatch, useSelector } from "react-redux";
-import HomeLayout from "../../Layouts/HomeLayout";
 import {
-	Chart as ChartJS,
 	ArcElement,
-	Tooltip,
-	Legend,
-	CategoryScale,
-	LinearScale,
 	BarElement,
+	CategoryScale,
+	Chart as ChartJS,
+	Legend,
+	LinearScale,
 	Title,
+	Tooltip,
 } from "chart.js/auto";
-import { useNavigate } from "react-router-dom";
 import { useEffect } from "react";
-import { deleteCourse, getAllCourses } from "../../Redux/Slices/CourseSlice";
-import { getStatData } from "../../Redux/Slices/StatSlice";
-import { getPaymentRecords } from "../../Redux/Slices/RazorpaySlice";
 import { Bar, Pie } from "react-chartjs-2";
+import { BsCollectionPlayFill, BsTrash } from "react-icons/bs";
 import { FaUsers } from "react-icons/fa";
 import { FcSalesPerformance } from "react-icons/fc";
 import { GiMoneyStack } from "react-icons/gi";
-import { BsCollectionPlayFill, BsTrash } from "react-icons/bs";
+import { useDispatch, useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
+
+import HomeLayout from "../../Layouts/HomeLayout";
+import { deleteCourse, getAllCourses } from "../../Redux/Slices/CourseSlice";
+import { getPaymentRecords } from "../../Redux/Slices/RazorpaySlice";
+import { getStatData } from "../../Redux/Slices/StatSlice";
 
 ChartJS.register(
 	ArcElement,

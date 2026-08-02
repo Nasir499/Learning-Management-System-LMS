@@ -47,17 +47,14 @@ router.route('/:id')
         addLectureToCourseById
     )
     // Attach lecture metadata when client has uploaded file directly to Cloudinary
-    .post(
-        ":id/attach",
-        isLoggedIn,
-        authorizedRoles("ADMIN"),
-        attachLectureMetadata
-    )
     .delete(
         isLoggedIn,
         authorizedRoles("ADMIN"),
         removeCourse
     )
+
+// Attach lecture metadata when client has uploaded file directly to Cloudinary
+router.post('/:id/attach', isLoggedIn, authorizedRoles('ADMIN'), attachLectureMetadata);
 
 // Upload video for an existing lecture
 router.post('/:id/lecture/:lectureId/upload', isLoggedIn, authorizedRoles('ADMIN'), upload.single('lecture'), uploadLectureVideo);
