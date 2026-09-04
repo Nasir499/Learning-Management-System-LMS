@@ -1,10 +1,12 @@
 import './App.css'
 
-import { lazy, Suspense } from 'react'
+import { lazy, Suspense, useEffect } from 'react'
+import { useDispatch, useSelector } from 'react-redux'
 import { Route, Routes } from 'react-router-dom'
 
 import RequireAuth from './Components/Auth/RequireAuth'
 import ErrorBoundary from './Components/ErrorBoundary'
+import { getProfile } from './Redux/Slices/AuthSlice'
 
 const AboutUs = lazy(() => import('./Pages/AboutUs'))
 const Contact = lazy(() => import('./Pages/Contact'))
@@ -36,6 +38,14 @@ function PageLoader() {
 }
 
 function App() {
+  const dispatch = useDispatch()
+  const { isLoggedIn } = useSelector((state) => state.auth)
+
+  useEffect(() => {
+    if (isLoggedIn) {
+      dispatch(getProfile())
+    }
+  }, [dispatch, isLoggedIn])
   return (
     <ErrorBoundary>
       <Suspense fallback={<PageLoader />}>

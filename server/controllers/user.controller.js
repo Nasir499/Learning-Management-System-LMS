@@ -143,10 +143,16 @@ const logout = (req, res,next) => {
   }
 }
 
-const getProfile = async (req, res,next) => {
+const getProfile = async (req, res, next) => {
   try {
     const userId = req.user.id;
-    const user = await User.findById(userId)
+    const user = await User.findById(userId);
+
+    if (user && (user.role !== req.user.role || user.subscription?.status !== req.user.subscription?.status)) {
+        const token = await user.generateJWTToken();
+        res.cookie('token', token, cookieOptions);
+    }
+
     res.status(200).json({
       success: true,
       message: "User details",

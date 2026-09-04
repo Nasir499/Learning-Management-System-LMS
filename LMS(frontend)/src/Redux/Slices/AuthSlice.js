@@ -131,13 +131,18 @@ const authSlice = createSlice({
                 state.role = ""
             })
         .addCase(getProfile.fulfilled, (state, action) => {
-                // if(action?.payload?.user) return
                 localStorage.setItem('data', JSON.stringify(action?.payload?.user))
                 localStorage.setItem('isLoggedIn', true)
                 localStorage.setItem('role', action?.payload?.user?.role)
-                state.isLoggedIn = true,
-                    state.data = action?.payload?.user,
-                    state.role = action?.payload?.user?.role
+                state.isLoggedIn = true;
+                state.data = action?.payload?.user;
+                state.role = action?.payload?.user?.role;
+            })
+        .addCase(getProfile.rejected, (state) => {
+                localStorage.clear();
+                state.data = {};
+                state.isLoggedIn = false;
+                state.role = "";
             })
     }
 })
