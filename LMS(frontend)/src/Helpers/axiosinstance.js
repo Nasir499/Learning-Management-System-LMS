@@ -1,11 +1,13 @@
 import axios from "axios";
 
-const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:8000/api/v1"
+const rawUrl = import.meta.env.VITE_API_URL || "https://learning-management-system-lms-2-cd4y.onrender.com";
+const cleanUrl = rawUrl.replace(/\/api\/v1\/?$/, '').replace(/\/$/, '');
+const BASE_URL = `${cleanUrl}/api/v1`;
 
 const axiosInstance = axios.create({
   baseURL: BASE_URL,
 });
-axiosInstance.defaults.baseURL = BASE_URL
+axiosInstance.defaults.baseURL = BASE_URL;
 axiosInstance.defaults.timeout = 600000;
 axiosInstance.defaults.withCredentials = true;
 axiosInstance.defaults.headers.common['Content-Type'] = 'application/json';
