@@ -174,10 +174,10 @@ function AddLecture() {
 
   return (
     <HomeLayout>
-      <div className='min-h-[90vh] text-white flex flex-col items-center justify-center gap-10 mx-16'>
-            <div className='flex flex-col gap-5 p-2 shadow-[0_0_10px_black] w-96 rounded-lg'>
-                <header className='flex items-center justify-center relative'>
-                    <button className='absolute left-2 text-xl text-green-500 cursor-pointer' onClick={()=>navigate(-1)}>
+      <div className='min-h-[90vh] text-white flex flex-col items-center justify-center gap-10 py-10 px-4 sm:px-16'>
+            <div className='flex flex-col gap-5 p-5 shadow-[0_0_10px_black] w-full max-w-md rounded-lg bg-gray-800/40 border border-gray-700'>
+                <header className='flex items-center justify-center relative pb-2 border-b border-gray-700'>
+                    <button className='absolute left-0 text-xl text-green-500 cursor-pointer p-1' onClick={()=>navigate(-1)}>
                         <AiOutlineArrowLeft/>
                     </button>
                     <h1 className='text-xl text-yellow-500 font-semibold '>Add Lecture</h1>

@@ -6,6 +6,7 @@ import { Route, Routes } from 'react-router-dom'
 
 import RequireAuth from './Components/Auth/RequireAuth'
 import ErrorBoundary from './Components/ErrorBoundary'
+import ScrollToTop from './Components/ScrollToTop'
 import { getProfile } from './Redux/Slices/AuthSlice'
 
 const AboutUs = lazy(() => import('./Pages/AboutUs'))
@@ -48,6 +49,7 @@ function App() {
   }, [dispatch, isLoggedIn])
   return (
     <ErrorBoundary>
+      <ScrollToTop />
       <Suspense fallback={<PageLoader />}>
         <Routes>
           <Route path='/' element={<HomePage />} />

@@ -49,10 +49,10 @@ function ChangePassword() {
 
     return (
         <HomeLayout>
-            <div className="flex items-center justify-center h-[100vh]">
+            <div className="flex items-center justify-center min-h-[90vh] py-10 px-4">
                 <form
                     onSubmit={onFormSubmit}
-                    className="flex flex-col justify-center gap-5 rounded-md p-4 text-white w-80 min-h-[26rem] shadow-[0_0_10px_black]"
+                    className="flex flex-col justify-center gap-5 rounded-md p-5 text-white w-full max-w-sm min-h-[26rem] shadow-[0_0_10px_black]"
                 >
                     <h1 className="text-center text-2xl font-semibold">Change Password</h1>
 
@@ -66,7 +66,7 @@ function ChangePassword() {
                             name="oldPassword"
                             id="oldPassword"
                             placeholder="Enter your old password"
-                            className="bg-transparent px-2 py-1 border rounded-sm"
+                            className="bg-transparent px-2 py-1.5 border rounded-sm w-full"
                             value={userPassword.oldPassword}
                             onChange={handleInputChange}
                         />
@@ -82,7 +82,7 @@ function ChangePassword() {
                             name="newPassword"
                             id="newPassword"
                             placeholder="Enter your new password"
-                            className="bg-transparent px-2 py-1 border rounded-sm"
+                            className="bg-transparent px-2 py-1.5 border rounded-sm w-full"
                             value={userPassword.newPassword}
                             onChange={handleInputChange}
                         />

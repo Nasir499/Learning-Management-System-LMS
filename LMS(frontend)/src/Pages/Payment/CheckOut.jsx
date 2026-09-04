@@ -72,27 +72,27 @@ function CheckOut() {
   return (
     <HomeLayout>
       <form
-        className='min-h-[90vh] flex items-center justify-center text-white'
+        className='min-h-[90vh] py-10 px-4 flex items-center justify-center text-white'
         onSubmit={handleSubscription}
       >
-        <div className='w-80 h-[26rem] flex flex-col justify-center shadow-[0_0_10px_black] rounded-lg relative'>
-          <h1 className='bg-yellow-500 absolute top-0 w-full text-center py-4 text-2xl font-bold rounded-tl-lg rounded-tr-lg'>Subscription Bundle</h1>
-          <div className='px-4 space-y-5 text-center'>
-            <p className='text-[17px] mt-10'>
+        <div className='w-full max-w-sm flex flex-col justify-between shadow-[0_0_10px_black] rounded-lg relative overflow-hidden bg-gray-800/40 border border-gray-700 pb-5'>
+          <h1 className='bg-yellow-500 w-full text-center py-4 text-xl sm:text-2xl font-bold text-black'>Subscription Bundle</h1>
+          <div className='p-5 space-y-5 text-center flex-1 flex flex-col justify-between'>
+            <p className='text-sm sm:text-base text-gray-200 leading-relaxed'>
               This is a one time payment bundle which includes all the courses in this platform for
-              <span className='text-yellow-500'>&nbsp;1 year duration</span>&nbsp;
+              <span className='text-yellow-500 font-bold'>&nbsp;1 year duration</span>.&nbsp;
               All existing and upcoming courses will be available in this bundle.
             </p>
             <p className='flex items-center justify-center gap-1 text-2xl font-bold text-yellow-500'>
-              <BiRupee /><span>499</span>only
+              <BiRupee /><span>499</span>&nbsp;only
             </p>
-            <div className='text-gray-300'>
+            <div className='text-xs text-gray-300 space-y-1'>
               <p>100% refund policy</p>
               <p>* terms and conditions apply</p>
             </div>
             <button
               type='submit'
-              className='w-full bg-yellow-500 text-black font-semibold py-2 rounded-lg hover:bg-yellow-600 duration-300 bottom-0 cursor-pointer'
+              className='w-full bg-yellow-500 text-black font-semibold py-2.5 rounded-lg hover:bg-yellow-600 transition-all duration-300 cursor-pointer text-base sm:text-lg'
             >
               Subscribe Now
             </button>

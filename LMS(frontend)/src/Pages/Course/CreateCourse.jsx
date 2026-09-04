@@ -67,23 +67,23 @@ function CreateCourse() {
     }
   return (
     <HomeLayout>
-        <div className="flex items-center justify-center h-[100vh]">
+        <div className="flex items-center justify-center min-h-[90vh] py-10 px-4">
             <form
             noValidate
             onSubmit={onFormSubmit}
-            className="flex flex-col justify-center gap-5 rounded-lg p-4 text-white w-[700px] my-10 shadow-[0_0_10px_black] relative"
+            className="flex flex-col justify-center gap-5 rounded-lg p-5 text-white w-full max-w-[700px] my-5 shadow-[0_0_10px_black] relative"
             >
 
-                <Link onClick={()=>navigate(-1)} className="absolute top-6 left-4 link cursor-pointer text-accent ">
-                    <AiOutlineArrowLeft/>
+                <Link onClick={()=>navigate(-1)} className="absolute top-6 left-4 link cursor-pointer text-accent">
+                    <AiOutlineArrowLeft size={22}/>
                 </Link>
 
-                <h1 className="text-2xl font-bold text-center">
+                <h1 className="text-2xl font-bold text-center mt-2">
                     Create New Course
                 </h1>
 
-                <main className="grid grid-cols-2 gap-x-10">
-                    <div className="gap-y-6">
+                <main className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-x-10">
+                    <div className="flex flex-col gap-y-4">
                         <div>
                             <label 
                             htmlFor="image_uploads" 
@@ -93,11 +93,11 @@ function CreateCourse() {
                                     <img 
                                         src={userInput.previewImage} 
                                         alt="Preview"
-                                        className="w-full h-44 m-auto border object-cover"
+                                        className="w-full h-44 m-auto border object-cover rounded-sm"
                                            />
                                     ) : (
-                                        <div className="w-full h-44 m-auto flext justify-center items-center border">
-                                            <h1 className="font-bold text-lg">Upload Image</h1>
+                                        <div className="w-full h-44 m-auto flex justify-center items-center border border-dashed rounded-sm hover:border-yellow-500 transition-all">
+                                            <h1 className="font-bold text-lg text-gray-300">Upload Image</h1>
                                         </div>
                                     )
                                       }
@@ -114,8 +114,8 @@ function CreateCourse() {
                         </div>
 
                         <div className="flex flex-col gap-1">
-                                <label className="text-lg font-semibold " htmlFor="title" >
-                                      Course Title
+                                <label className="text-lg font-semibold text-gray-200" htmlFor="title" >
+                                       Course Title
                                 </label>
                                 <input 
                                 type="text" 
@@ -123,16 +123,16 @@ function CreateCourse() {
                                 name="title"
                                 id="title"
                                 placeholder="Enter course title"
-                                className="bg-transparent px-2 py-1 border "
+                                className="bg-transparent px-3 py-2 border border-gray-600 rounded-md w-full focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 focus:outline-none transition-all"
                                 value={userInput.title}
                                 onChange={handleUserInput}
                                 />
                         </div>
                     </div>
                     
-                    <div className="flex flex-col gap-1">
+                    <div className="flex flex-col gap-3">
                             <div className="flex flex-col gap-1">
-                                <label className="text-lg font-semibold " htmlFor="createdBy" >
+                                <label className="text-lg font-semibold text-gray-200" htmlFor="createdBy" >
                                       Instructor
                                 </label>
                                 <input 
@@ -141,13 +141,13 @@ function CreateCourse() {
                                 name="createdBy"
                                 id="createdBy"
                                 placeholder="Enter course Instructor"
-                                className="bg-transparent px-2 py-1 border "
+                                className="bg-transparent px-3 py-2 border border-gray-600 rounded-md w-full focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 focus:outline-none transition-all"
                                 value={userInput.createdBy}
                                 onChange={handleUserInput}
                                 />
                             </div>
                             <div className="flex flex-col gap-1">
-                                <label className="text-lg font-semibold " htmlFor="category" >
+                                <label className="text-lg font-semibold text-gray-200" htmlFor="category" >
                                       Course Category
                                 </label>
                                 <input
@@ -156,22 +156,21 @@ function CreateCourse() {
                                 name="category"
                                 id="category"
                                 placeholder="Enter course Category"
-                                className="bg-transparent px-2 py-1 border "
+                                className="bg-transparent px-3 py-2 border border-gray-600 rounded-md w-full focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 focus:outline-none transition-all"
                                 value={userInput.category}
                                 onChange={handleUserInput}
                                 />
                             </div>
                             <div className="flex flex-col gap-1">
-                                <label className="text-lg font-semibold " htmlFor="description" >
+                                <label className="text-lg font-semibold text-gray-200" htmlFor="description" >
                                       Course Description
                                 </label>
                                 <textarea
-                                type="text"
                                 required
                                 name="description"
                                 id="description"
                                 placeholder="Enter course Description"
-                                className="bg-transparent px-2 py-1 h-24 overflow-y-scroll resize-none border "
+                                className="bg-transparent px-3 py-2 h-24 overflow-y-auto resize-none border border-gray-600 rounded-md w-full focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 focus:outline-none transition-all"
                                 value={userInput.description}
                                 onChange={handleUserInput}
                                 />
@@ -180,7 +179,7 @@ function CreateCourse() {
 
                 </main>
                 
-                <button type="submit" className="w-full py-2 rounded-sm font-semibold text-lg cursor-pointer bg-yellow-600 hover:bg-yellow-500 transition-all ease-in-out duration-300">
+                <button type="submit" className="w-full py-2.5 rounded-sm font-semibold text-lg cursor-pointer bg-yellow-600 hover:bg-yellow-500 transition-all ease-in-out duration-300">
                     Create Course
                 </button>
               </form>

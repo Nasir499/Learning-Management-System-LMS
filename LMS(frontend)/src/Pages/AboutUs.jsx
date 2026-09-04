@@ -52,7 +52,7 @@ function AboutUs() {
 
     return (
         <HomeLayout>
-            <div className='px-6 md:px-16 py-4 flex flex-col justify-evenly items-center text-white h-[calc(100vh-10vh)] max-w-7xl mx-auto overflow-hidden'>
+            <div className='px-4 sm:px-8 md:px-16 py-8 flex flex-col justify-evenly items-center text-white min-h-[calc(100vh-10vh)] gap-8 max-w-7xl mx-auto'>
                 {/* Hero Section */}
                 <div className='flex flex-col md:flex-row items-center justify-between gap-6 w-full'>
                     <section className='w-full md:w-1/2 space-y-3 md:space-y-4'>

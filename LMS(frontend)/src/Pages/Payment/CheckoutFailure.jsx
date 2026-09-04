@@ -5,24 +5,22 @@ import HomeLayout from '../../Layouts/HomeLayout'
 function CheckoutFailure() {
   return (
     <HomeLayout>
-        <div className='min-h-[90vh] flex items-center justify-center text-white'>
-                <div className='w-80 h-[26rem] flex flex-col justify-center items-center shadow-[0_0_10px_black] relative rounded-lg'>
-                        <h1 className='bg-red-500 absolute top-0 w-full py-4 text-2xl font-bold rounded-tl-lg rounded-tr-lg text-center'>Payment Failed</h1>
+        <div className='min-h-[90vh] py-10 px-4 flex items-center justify-center text-white'>
+                <div className='w-full max-w-sm flex flex-col justify-between items-center shadow-[0_0_10px_black] rounded-lg relative overflow-hidden bg-gray-800/40 border border-gray-700 min-h-[24rem] pb-5'>
+                        <h1 className='bg-red-500 w-full py-4 text-xl sm:text-2xl font-bold text-center text-white'>Payment Failed</h1>
 
-                        <div className='px-4 flex flex-col items-center justify-center space-y-2'>
-                                <div className='text-center space-y-2'>
+                        <div className='p-5 flex flex-col items-center justify-center space-y-4 text-center my-auto'>
+                                <div className='space-y-2'>
                                     <h2 className='text-lg font-semibold'>
                                         Oops!! Your payment failed
                                     </h2>
-                                    <p>
-                                        please try again
+                                    <p className='text-sm text-gray-300'>
+                                        Please try again
                                     </p>
                                 </div>
-                                {/* <RxCrossCircled className='text-red-500 text-5xl flex items-center justify-center'/> */}
-        
                         </div>
                         
-                        <Link to='/checkout' className='w-4/5 bg-red-500 hover:bg-red-600 transition-all ease-in-out duration-300 rounded-sm font-semibold py-2 cursor-pointer text-center absolute bottom-4'><button>Try Again</button></Link>
+                        <Link to='/checkout' className='w-4/5 bg-red-500 hover:bg-red-600 transition-all ease-in-out duration-300 rounded-md font-semibold py-2.5 cursor-pointer text-center text-white'><button className="w-full">Try Again</button></Link>
                 </div>
         </div>
     </HomeLayout>

@@ -90,13 +90,13 @@ function SignUp() {
 
   return (
     <HomeLayout>
-        <div className='flex items-center justify-center h-[100vh]'>
-            <form noValidate onSubmit={createNewAccount} className='flex flex-col justify-center gap-3 rounded-lg p-4 text-white w-96 shadow-[0_0_10px_black]'>
+        <div className='flex items-center justify-center min-h-[90vh] py-10 px-4'>
+            <form noValidate onSubmit={createNewAccount} className='flex flex-col justify-center gap-3 rounded-lg p-5 text-white w-full max-w-md shadow-[0_0_10px_black]'>
                 <h1 className='text-center text-2xl font-bold'>Registration Page</h1>
 
                 <label htmlFor="image_uploads" className='cursor-pointer'>
                     {previewImage ?(
-                        <img className='w-24 h-24 m-auto rounded-full' src={previewImage} />
+                        <img className='w-24 h-24 m-auto rounded-full object-cover' src={previewImage} />
                     ):(
                         <BsPersonCircle className='w-24 h-24 rounded-full m-auto'/>
                     )}
@@ -112,13 +112,13 @@ function SignUp() {
                  />
 
                  <div className='flex flex-col gap-1'>
-                    <label htmlFor="fullName" className='font-semibold'>Fullname</label>
+                    <label htmlFor="fullName" className='font-semibold text-gray-200'>Fullname</label>
                     <input
                      type="text"
                      required
                      name='fullName'
                      placeholder='Enter your Fullname'
-                     className='bg-transparent px-2 py-1 border'
+                     className='bg-transparent px-3 py-2 border border-gray-600 rounded-md w-full focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 focus:outline-none transition-all'
                      id='fullName'
                      onChange={handleUserInput}
                      value={signUpData.fullName}
@@ -126,39 +126,39 @@ function SignUp() {
                  </div>
 
                  <div className='flex flex-col gap-1'>
-                    <label htmlFor="email" className='font-semibold'>Email</label>
+                    <label htmlFor="email" className='font-semibold text-gray-200'>Email</label>
                     <input
                      type="email"
                      required
                      name='email'
                      id='email'
                      placeholder='Enter your Email'
-                     className='bg-transparent px-2 py-1 border'
+                     className='bg-transparent px-3 py-2 border border-gray-600 rounded-md w-full focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 focus:outline-none transition-all'
                      onChange={handleUserInput}
                      value={signUpData.email}
                       />
                  </div>
         
                  <div className='flex flex-col gap-1'>
-                    <label htmlFor="password" className='font-semibold'>Password</label>
+                    <label htmlFor="password" className='font-semibold text-gray-200'>Password</label>
                     <input
                      type="password"
                      required
                      name='password'
                      placeholder='Enter your Password'
-                     className='bg-transparent px-2 py-1 border'
+                     className='bg-transparent px-3 py-2 border border-gray-600 rounded-md w-full focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 focus:outline-none transition-all'
                      id='password'
                      onChange={handleUserInput}
                      value={signUpData.password}
                       />
                  </div>
 
-                 <button type="submit" className='w-full bg-yellow-500 hover:bg-yellow-700 py-2 rounded-lg transition-all ease-in-out duration-300 font-bold cursor-pointer'>
+                 <button type="submit" className='w-full bg-yellow-500 hover:bg-yellow-600 active:bg-yellow-700 py-2.5 rounded-md transition-all ease-in-out duration-300 font-bold cursor-pointer mt-2 text-black shadow-md'>
                     Register
                  </button>
 
                  <p className="text-center">
-                    Already have an account? <Link to='/login'><span className='text-blue-600'>Login</span></Link>
+                    Already have an account? <Link to='/login'><span className='text-blue-600 font-semibold'>Login</span></Link>
                  </p>
             </form>
         </div>

@@ -69,11 +69,11 @@ function EditProfile() {
   
   return (
     <HomeLayout>
-        <div className="flex items-center justify-center h-[100vh]">
+        <div className="flex items-center justify-center min-h-[90vh] py-10 px-4">
             <form 
                noValidate  
                onSubmit={onFormSubmit}
-               className="flex flex-col justify-center gap-5 rounded-md p-4 text-white w-80 min-h-[26rem] shadow-[0_0_10px_black]"            
+               className="flex flex-col justify-center gap-5 rounded-md p-5 text-white w-full max-w-sm min-h-[26rem] shadow-[0_0_10px_black]"            
             >
                         <h1 className="text-center text-2xl font-semibold">
                             Edit Profile
@@ -81,7 +81,7 @@ function EditProfile() {
                         <label htmlFor="image_uploads" className="cursor-pointer">
                                 {data.previewImage ? (
                                 <img src={data.previewImage}
-                                  className="w-28 h-28 rounded-full m-auto"
+                                  className="w-28 h-28 rounded-full m-auto object-cover"
                                 />
                                 ):(
                                     <BsPersonCircle className="w-28 h-28 rounded-full m-auto"/>
@@ -92,7 +92,7 @@ function EditProfile() {
                           className="hidden"
                           id="image_uploads"
                           name="image_uploads"
-                          file='.jpg,.jpeg,.png,.svg'
+                          accept='.jpg,.jpeg,.png,.svg'
                          />
 
                          <div className="flex flex-col gap-1">
@@ -103,12 +103,12 @@ function EditProfile() {
                                name="fullName"
                                id="fullName"
                                placeholder="Enter Your Name"
-                               className="bg-transparent px-2 py-1 border"
+                               className="bg-transparent px-2 py-1.5 border rounded-sm w-full"
                                value={data.fullName}
                                onChange={handleInputChange}
                              />
                          </div>
-                         <button className="w-full bg-yellow-600 hover:bg-yellow-500 transition-all ease-in-out duration-300 rounded-sm py-2 text-lg cursor-pointer">
+                         <button className="w-full bg-yellow-600 hover:bg-yellow-500 transition-all ease-in-out duration-300 rounded-sm py-2 text-lg cursor-pointer font-semibold">
                             Update Profile
                          </button>
                          <Link to="/user/profile">
