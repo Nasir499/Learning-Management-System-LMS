@@ -13,6 +13,9 @@ import rateLimit from "express-rate-limit";
 
 const app = express();
 
+// Trust reverse proxy (Render, Vercel, Heroku) for rate limiting & secure cookies
+app.set('trust proxy', 1);
+
 const authLimiter = rateLimit({
     windowMs: 15 * 60 * 1000, // 15 minutes
     max: 20, // Limit each IP to 20 requests per 15 minutes

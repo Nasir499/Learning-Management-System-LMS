@@ -6,11 +6,13 @@ import crypto from "crypto"
 import sendEmail from "../utils/sendEmail.js";
 import bcrypt from "bcrypt"
 
+const isProduction = process.env.NODE_ENV === 'production' || Boolean(process.env.RENDER) || (process.env.FRONTEND_URL && !process.env.FRONTEND_URL.includes('localhost'));
+
 const cookieOptions = {
   maxAge: 7 * 24 * 60 * 60 * 1000,
   httpOnly: true,
-  secure: process.env.NODE_ENV === 'production',
-  sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax'
+  secure: isProduction,
+  sameSite: isProduction ? 'none' : 'lax'
 }
 
 const register = async (req, res, next) => {
@@ -129,8 +131,8 @@ const login = async (req, res,next) => {
 const logout = (req, res,next) => {
   try {
     res.cookie('token', null, {
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+      secure: isProduction,
+      sameSite: isProduction ? 'none' : 'lax',
       maxAge: 0,
       httpOnly: true
     })
