@@ -97,7 +97,9 @@ export const getProfile = createAsyncThunk("/user/details", async (_, { rejectWi
         return res.data
     } catch (error) {
         const message = error?.response?.data?.message || error.message || "Failed to get profile";
-        toast.error(message);
+        if (error?.response?.status !== 401) {
+            toast.error(message);
+        }
         return rejectWithValue(message);
     }
 })
@@ -109,20 +111,22 @@ const authSlice = createSlice({
     extraReducers: (builder) => {
         builder
         .addCase(createAccount.fulfilled, (state, action) => {
+            if (action?.payload?.token) localStorage.setItem('token', action.payload.token)
             localStorage.setItem('data', JSON.stringify(action?.payload?.user))
             localStorage.setItem('isLoggedIn', true)
             localStorage.setItem('role', action?.payload?.user?.role)
-            state.isLoggedIn = true,
-                state.data = action?.payload?.user,
-                state.role = action?.payload?.user?.role
+            state.isLoggedIn = true;
+            state.data = action?.payload?.user;
+            state.role = action?.payload?.user?.role;
         })
         .addCase(login.fulfilled, (state, action) => {
+            if (action?.payload?.token) localStorage.setItem('token', action.payload.token)
             localStorage.setItem('data', JSON.stringify(action?.payload?.user))
             localStorage.setItem('isLoggedIn', true)
             localStorage.setItem('role', action?.payload?.user?.role)
-            state.isLoggedIn = true,
-                state.data = action?.payload?.user,
-                state.role = action?.payload?.user?.role
+            state.isLoggedIn = true;
+            state.data = action?.payload?.user;
+            state.role = action?.payload?.user?.role;
         })
         .addCase(logout.fulfilled, (state) => {
                 localStorage.clear()
@@ -131,6 +135,7 @@ const authSlice = createSlice({
                 state.role = ""
             })
         .addCase(getProfile.fulfilled, (state, action) => {
+                if (action?.payload?.token) localStorage.setItem('token', action.payload.token)
                 localStorage.setItem('data', JSON.stringify(action?.payload?.user))
                 localStorage.setItem('isLoggedIn', true)
                 localStorage.setItem('role', action?.payload?.user?.role)

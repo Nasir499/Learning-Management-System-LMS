@@ -83,6 +83,7 @@ const register = async (req, res, next) => {
       success: true,
       message: "User registred successfully",
       user,
+      token
     })
   } catch (error) {
     return next(new AppError(error.message, 500))
@@ -120,7 +121,8 @@ const login = async (req, res,next) => {
     res.status(200).json({
       success: true,
       message: "User loggedin successfully",
-      user
+      user,
+      token
     })
   }
   catch (error) {
@@ -149,16 +151,18 @@ const getProfile = async (req, res, next) => {
   try {
     const userId = req.user.id;
     const user = await User.findById(userId);
+    let token;
 
     if (user && (user.role !== req.user.role || user.subscription?.status !== req.user.subscription?.status)) {
-        const token = await user.generateJWTToken();
+        token = await user.generateJWTToken();
         res.cookie('token', token, cookieOptions);
     }
 
     res.status(200).json({
       success: true,
       message: "User details",
-      user
+      user,
+      ...(token && { token })
     })
   } catch (error) {
     return next(new AppError("Failed to fetch user profile detail", 500))
