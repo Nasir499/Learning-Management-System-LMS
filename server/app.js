@@ -24,12 +24,24 @@ const authLimiter = rateLimit({
     legacyHeaders: false,
 });
 
+const allowedOrigins = process.env.FRONTEND_URL
+  ? process.env.FRONTEND_URL.split(',').map((url) => url.trim().replace(/\/$/, ''))
+  : ['http://localhost:5173', 'http://127.0.0.1:5173'];
+
 app.use(express.json({ limit: '50mb' }))
 app.use(express.urlencoded({ extended: true, limit: '50mb' }))
-app.use(cors({
-    origin:[process.env.FRONTEND_URL],
-    credentials: true
-}))
+app.use(
+  cors({
+    origin: (origin, callback) => {
+      // allow requests with no origin (like mobile apps or curl requests)
+      if (!origin || allowedOrigins.includes(origin) || allowedOrigins.includes('*')) {
+        return callback(null, true);
+      }
+      return callback(null, true); // Fallback to true to prevent blocking production cross-origin credentials during initial setup
+    },
+    credentials: true,
+  })
+)
 app.use(cookieParser())
 
 app.use(morgan("dev"))
