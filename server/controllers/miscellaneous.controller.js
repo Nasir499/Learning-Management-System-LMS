@@ -40,10 +40,11 @@ export const contactUs = async (req, res, next) => {
  * @ACCESS Private(ADMIN ONLY)
  */
 export const userStats = async (req, res, next) => {
-  const allUsersCount = await User.countDocuments();
+  const allUsersCount = await User.countDocuments({ role: 'USER' });
 
   const subscribedUsersCount = await User.countDocuments({
-    'subscription.status': 'active', // subscription.status means we are going inside an object and we have to put this in quotes
+    role: 'USER',
+    'subscription.status': 'active',
   });
 
   res.status(200).json({

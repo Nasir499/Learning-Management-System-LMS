@@ -136,93 +136,47 @@ const cancelSubscription = async (req, res, next) => {
  * @ACCESS Private (ADMIN only)
  */
 export const allPayments = async (req, res, _next) => {
-  const { count, skip } = req.query;
+  try {
+    const payments = await Payment.find();
+    const totalPayments = payments.length;
 
-  const subscriptions = await razorpay.subscriptions.all({
-    count: count ? count : 100, // Default to 100
-    skip: skip ? skip : 0,
-  });
+    const monthNames = [
+      'January', 'February', 'March', 'April', 'May', 'June',
+      'July', 'August', 'September', 'October', 'November', 'December'
+    ];
 
-  const currentYear = new Date().getFullYear();
-  
-  // Filter out unpaid subscriptions and only include the current year's data for the chart
-  const activeSubscriptions = subscriptions.items.filter((payment) => {
-    // Check if the subscription actually generated revenue
-    const isPaid = payment.status === 'active' || payment.status === 'completed' || 
-                   (payment.status === 'cancelled' && payment.paid_count > 0);
-    if (!isPaid) return false;
-    
-    // Only include subscriptions from the current year
-    const startYear = payment.start_at ? new Date(payment.start_at * 1000).getFullYear() : null;
-    return startYear === currentYear;
-  });
+    const finalMonths = {
+      January: 0, February: 0, March: 0, April: 0, May: 0, June: 0,
+      July: 0, August: 0, September: 0, October: 0, November: 0, December: 0
+    };
 
-  // Get total successful payments from DB for accurate revenue calculation
-  const totalPayments = await Payment.countDocuments();
+    const currentYear = new Date().getFullYear();
 
-  const allPayments = {
-    count: totalPayments,
-    items: activeSubscriptions,
-  };
-
-  const monthNames = [
-    'January',
-    'February',
-    'March',
-    'April',
-    'May',
-    'June',
-    'July',
-    'August',
-    'September',
-    'October',
-    'November',
-    'December',
-  ];
-
-  const finalMonths = {
-    January: 0,
-    February: 0,
-    March: 0,
-    April: 0,
-    May: 0,
-    June: 0,
-    July: 0,
-    August: 0,
-    September: 0,
-    October: 0,
-    November: 0,
-    December: 0,
-  };
-
-  const monthlyWisePayments = allPayments.items.map((payment) => {
-    // We are using payment.start_at which is in unix time, so we are converting it to Human readable format using Date()
-    const monthsInNumbers = new Date(payment.start_at * 1000);
-
-    return monthNames[monthsInNumbers.getMonth()];
-  });
-
-  monthlyWisePayments.map((month) => {
-    Object.keys(finalMonths).forEach((objMonth) => {
-      if (month === objMonth) {
-        finalMonths[month] += 1;
+    payments.forEach((payment) => {
+      const createdAt = new Date(payment.createdAt);
+      if (createdAt.getFullYear() === currentYear) {
+        const monthName = monthNames[createdAt.getMonth()];
+        if (finalMonths[monthName] !== undefined) {
+          finalMonths[monthName] += 1;
+        }
       }
     });
-  });
 
-  const monthlySalesRecord = [];
+    const monthlySalesRecord = Object.values(finalMonths);
 
-  Object.keys(finalMonths).forEach((monthName) => {
-    monthlySalesRecord.push(finalMonths[monthName]);
-  });
-
-  res.status(200).json({
-    success: true,
-    message: 'All payments',
-    allPayments,
-    finalMonths,
-    monthlySalesRecords: monthlySalesRecord,
-  });
+    res.status(200).json({
+      success: true,
+      message: 'All payments',
+      allPayments: {
+        count: totalPayments,
+        items: payments,
+      },
+      finalMonths,
+      monthlySalesRecords: monthlySalesRecord,
+    });
+  } catch (error) {
+    return _next(new AppError(error.message, 500));
+  }
 };
 
 export const razorpayWebhook = async (req, res, next) => {
