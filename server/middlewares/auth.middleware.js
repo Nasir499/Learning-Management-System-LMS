@@ -17,13 +17,13 @@ const isLoggedIn = async (req, res, next) => {
         return next(new AppError("Invalid or expired authentication token", 401));
     }
 }
-const authorizedRoles = (...roles)=>async (req, res, next) => {
-    const currentUserRoles = req.user.role;
+const authorizedRoles = (...roles) => async (req, res, next) => {
+    const user = await User.findById(req.user.id);
+    const currentUserRoles = user ? user.role : req.user.role;
     if(!roles.includes(currentUserRoles)){
-    return next(new AppError("Unauthorized, You are not allowed to access this resource", 403));
-      }
+        return next(new AppError("Unauthorized, You are not allowed to access this resource", 403));
+    }
     next();
-
 }
 const authorizedSubscriber = async (req, res, next) => {
   let subscriptionStatus = req.user.subscription?.status;
