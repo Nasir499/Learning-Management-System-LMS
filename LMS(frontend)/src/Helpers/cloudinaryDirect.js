@@ -11,10 +11,16 @@ export function uploadToCloudinaryDirect(file, folder = 'lms', onProgress = null
         const signUrl = `${API_BASE}/api/v1/cloudinary/sign`;
         console.log('[cloudinaryDirect] signUrl ->', signUrl);
 
+        const token = localStorage.getItem('token');
+        const headers = { 'Content-Type': 'application/json' };
+        if (token) {
+          headers['Authorization'] = `Bearer ${token}`;
+        }
+
         const signResp = await fetch(signUrl, {
           method: 'POST',
           credentials: 'include',
-          headers: { 'Content-Type': 'application/json' },
+          headers,
           body: JSON.stringify({ folder }),
         });
 

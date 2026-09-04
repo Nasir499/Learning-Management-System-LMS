@@ -98,12 +98,18 @@ function AddLecture() {
                     setUploadProgress(progress);
                 });
                 // 2) tell server to attach metadata to course
+                const token = localStorage.getItem('token');
+                const headers = { 'Content-Type': 'application/json' };
+                if (token) {
+                  headers['Authorization'] = `Bearer ${token}`;
+                }
+
                 const rawApiBase = import.meta.env.VITE_API_URL || 'http://localhost:8000';
                 const cleanBase = rawApiBase.replace(/\/api\/v1\/?$/, '');
                 const attachResp = await fetch(`${cleanBase}/api/v1/course/${userInput.id}/attach`, {
                     method: 'POST',
                     credentials: 'include',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers,
                     body: JSON.stringify({ title: userInput.title, description: userInput.description, public_id: cloudResult.public_id, secure_url: cloudResult.secure_url })
                 });
                 const attachJson = await attachResp.json();
