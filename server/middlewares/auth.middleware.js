@@ -1,6 +1,7 @@
 import jwt from "jsonwebtoken";
 import AppError from "../utils/error.util.js";
 import User from "../models/user.model.js";
+import Course from "../models/course.model.js";
 
 const isLoggedIn = async (req, res, next) => {
     let token = req.cookies?.token;
@@ -47,14 +48,82 @@ const authorizedSubscriber = async (req, res, next) => {
     const subscriptionStatus = req.user.subscription?.status;
     const currentUserRole = req.user.role;
 
-    if (currentUserRole !== 'ADMIN' && currentUserRole !== 'INSTRUCTOR' && subscriptionStatus !== 'active') {
-        return next(new AppError("Unauthorized, You don't have permission to access this resource", 403));
+    if (currentUserRole === 'ADMIN') {
+        return next();
+    }
+
+    const courseId = req.params.id || req.body.courseId;
+    if (currentUserRole === 'INSTRUCTOR' && courseId) {
+        try {
+            const course = await Course.findById(courseId);
+            if (course) {
+                const userFullName = req.user.fullName?.trim().toLowerCase();
+                const userEmail = req.user.email?.trim().toLowerCase();
+                const courseCreator = course.createdBy?.trim().toLowerCase();
+
+                const isCreator = (
+                    courseCreator === userFullName ||
+                    courseCreator === userEmail ||
+                    courseCreator === req.user._id.toString()
+                );
+
+                if (isCreator) {
+                    return next();
+                }
+            }
+        } catch (e) {
+            // Fallback to subscription status
+        }
+    }
+
+    if (subscriptionStatus !== 'active') {
+        return next(new AppError("Unauthorized, Please subscribe to access this course lectures", 403));
     }
     next();
 }
 
+const isCourseCreatorOrAdmin = async (req, res, next) => {
+    const currentUserRole = req.user.role;
+    if (currentUserRole === 'ADMIN') {
+        return next();
+    }
+
+    if (currentUserRole !== 'INSTRUCTOR') {
+        return next(new AppError("Unauthorized, Only instructors and admins can perform this action", 403));
+    }
+
+    const courseId = req.params.id || req.body.courseId;
+    if (courseId) {
+        try {
+            const course = await Course.findById(courseId);
+            if (!course) {
+                return next(new AppError("Course not found", 404));
+            }
+
+            const userFullName = req.user.fullName?.trim().toLowerCase();
+            const userEmail = req.user.email?.trim().toLowerCase();
+            const courseCreator = course.createdBy?.trim().toLowerCase();
+
+            const isCreator = (
+                courseCreator === userFullName ||
+                courseCreator === userEmail ||
+                courseCreator === req.user._id.toString()
+            );
+
+            if (!isCreator) {
+                return next(new AppError("Unauthorized, You can only manage courses created by you", 403));
+            }
+        } catch (error) {
+            return next(new AppError("Course validation failed", 500));
+        }
+    }
+
+    next();
+};
+
 export {
     isLoggedIn,
     authorizedRoles,
-    authorizedSubscriber
+    authorizedSubscriber,
+    isCourseCreatorOrAdmin
 }

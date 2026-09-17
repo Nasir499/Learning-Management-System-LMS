@@ -10,7 +10,7 @@ import {
      repairLectureVideo,
      attachLectureMetadata
     } from '../controllers/course.controller.js';
-import { authorizedRoles, authorizedSubscriber, isLoggedIn } from "../middlewares/auth.middleware.js";
+import { authorizedRoles, authorizedSubscriber, isCourseCreatorOrAdmin, isLoggedIn } from "../middlewares/auth.middleware.js";
 import upload from '../middlewares/multer.middleware.js';
 import {  updateCourseById } from '../controllers/course.controller.js';
 
@@ -26,7 +26,7 @@ router.route('/')
     )
     .delete(
         isLoggedIn,
-        authorizedRoles("ADMIN", "INSTRUCTOR"),
+        isCourseCreatorOrAdmin,
         removeLectureFromCourse
     )
 router.route('/:id')
@@ -37,29 +37,29 @@ router.route('/:id')
     )
     .put(
         isLoggedIn,
-        authorizedRoles("ADMIN", "INSTRUCTOR"),
+        isCourseCreatorOrAdmin,
         updateCourseById
     )
     .post(
         isLoggedIn,
-        authorizedRoles("ADMIN", "INSTRUCTOR"),
+        isCourseCreatorOrAdmin,
         upload.single("lecture"),
         addLectureToCourseById
     )
     // Attach lecture metadata when client has uploaded file directly to Cloudinary
     .delete(
         isLoggedIn,
-        authorizedRoles("ADMIN", "INSTRUCTOR"),
+        isCourseCreatorOrAdmin,
         removeCourse
     )
 
 // Attach lecture metadata when client has uploaded file directly to Cloudinary
-router.post('/:id/attach', isLoggedIn, authorizedRoles('ADMIN', 'INSTRUCTOR'), attachLectureMetadata);
+router.post('/:id/attach', isLoggedIn, isCourseCreatorOrAdmin, attachLectureMetadata);
 
 // Upload video for an existing lecture
-router.post('/:id/lecture/:lectureId/upload', isLoggedIn, authorizedRoles('ADMIN', 'INSTRUCTOR'), upload.single('lecture'), uploadLectureVideo);
+router.post('/:id/lecture/:lectureId/upload', isLoggedIn, isCourseCreatorOrAdmin, upload.single('lecture'), uploadLectureVideo);
 
 // Repair a lecture's video reference. If a file is provided it will be uploaded; otherwise tries to regenerate secure_url from public_id or clears broken reference.
-router.post('/:id/lecture/:lectureId/repair', isLoggedIn, authorizedRoles('ADMIN', 'INSTRUCTOR'), upload.single('lecture'), repairLectureVideo);
+router.post('/:id/lecture/:lectureId/repair', isLoggedIn, isCourseCreatorOrAdmin, upload.single('lecture'), repairLectureVideo);
 
 export default router;

@@ -6,8 +6,13 @@ import HomeLayout from "../../Layouts/HomeLayout"
 function CourseDescription() {
     const navigate = useNavigate()
     const { state } = useLocation()
-    const {role,data} = useSelector((state) => state.auth)
-    
+    const isCourseCreator = role === "INSTRUCTOR" && (
+        state?.createdBy?.trim().toLowerCase() === data?.fullName?.trim().toLowerCase() ||
+        state?.createdBy?.trim().toLowerCase() === data?.email?.trim().toLowerCase()
+    );
+
+    const canWatchLectures = role === "ADMIN" || isCourseCreator || data?.subscription?.status === "active";
+
     return (
         <HomeLayout>
             <div className="min-h-[90vh] py-10 px-4 sm:px-12 md:px-20 flex flex-col items-center justify-center text-white">
@@ -38,7 +43,7 @@ function CourseDescription() {
 
                             </div>
 
-                            { role === "ADMIN" || role === "INSTRUCTOR" || data?.subscription?.status === "active" ? (
+                            { canWatchLectures ? (
                                 <button onClick={() => navigate("/course/displaylectures", {state: {...state}})} className="bg-yellow-600 text-lg sm:text-xl rounded-md font-bold px-5 py-3 w-full hover:bg-yellow-500 transition-all ease-in-out duration-300 cursor-pointer">
                                     Watch lectures
                                 </button>
