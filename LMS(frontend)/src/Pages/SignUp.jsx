@@ -18,7 +18,8 @@ function SignUp() {
         fullName:'',
         email:'',
         password:'',
-        avatar:''
+        avatar:'',
+        role:'USER'
     })
 
     function handleUserInput(e){
@@ -74,6 +75,7 @@ function SignUp() {
         formData.append("email",signUpData.email)
         formData.append("password",signUpData.password)
         formData.append("avatar",signUpData.avatar)
+        formData.append("role",signUpData.role)
 
         // dispatch create account action
         const response = await dispatch(createAccount(formData))
@@ -83,7 +85,8 @@ function SignUp() {
         fullName:'',
         email:'',
         password:'',
-        avatar:''
+        avatar:'',
+        role:'USER'
       })
       setPreviewImage("");
     }
@@ -110,6 +113,34 @@ function SignUp() {
                  accept='.jpg, .jpeg, .png, .svg'
                  name='image_uploads'
                  />
+
+                 <div className='flex flex-col gap-1.5'>
+                    <label className='font-semibold text-gray-200'>Register as</label>
+                    <div className='grid grid-cols-2 gap-3'>
+                        <button
+                            type="button"
+                            onClick={() => setSignUpData({ ...signUpData, role: 'USER' })}
+                            className={`py-2 px-3 rounded-md border text-sm font-semibold transition-all cursor-pointer ${
+                                signUpData.role === 'USER'
+                                ? 'bg-yellow-500/20 border-yellow-500 text-yellow-500 shadow-sm'
+                                : 'bg-gray-800/60 border-gray-700 text-gray-300 hover:border-gray-500'
+                            }`}
+                        >
+                            🎓 Student
+                        </button>
+                        <button
+                            type="button"
+                            onClick={() => setSignUpData({ ...signUpData, role: 'INSTRUCTOR' })}
+                            className={`py-2 px-3 rounded-md border text-sm font-semibold transition-all cursor-pointer ${
+                                signUpData.role === 'INSTRUCTOR'
+                                ? 'bg-yellow-500/20 border-yellow-500 text-yellow-500 shadow-sm'
+                                : 'bg-gray-800/60 border-gray-700 text-gray-300 hover:border-gray-500'
+                            }`}
+                        >
+                            👨‍🏫 Instructor
+                        </button>
+                    </div>
+                 </div>
 
                  <div className='flex flex-col gap-1'>
                     <label htmlFor="fullName" className='font-semibold text-gray-200'>Fullname</label>

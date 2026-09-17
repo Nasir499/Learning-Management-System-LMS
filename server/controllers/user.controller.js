@@ -17,7 +17,7 @@ const cookieOptions = {
 
 const register = async (req, res, next) => {
   try {
-    const { fullName, email, password } = req.body;
+    const { fullName, email, password, role } = req.body;
     if (!fullName || !email || !password) {
       return next(new AppError("All fields are required", 400))
     }
@@ -26,10 +26,13 @@ const register = async (req, res, next) => {
       return next(new AppError("Email is already registered", 400));
     }
 
+    const assignedRole = role === 'INSTRUCTOR' ? 'INSTRUCTOR' : 'USER';
+
     const user = await User.create({
       fullName,
       email,
       password,
+      role: assignedRole,
       avatar: {
         public_id: email,
         secure_url: ""
