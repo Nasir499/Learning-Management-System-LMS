@@ -5,6 +5,7 @@ import axiosInstance from "../../Helpers/axiosinstance"
 
 const initialState ={
     allUserCount:0,
+    instructorsCount:0,
     subscribedCount:0
 }
 
@@ -32,6 +33,7 @@ const statSlice = createSlice({
         builder
         .addCase(getStatData.fulfilled,(state,action)=>{
             state.allUserCount = action?.payload?.allUsersCount
+            state.instructorsCount = action?.payload?.instructorsCount || 0
             state.subscribedCount = action?.payload?.subscribedUsersCount
         })
 

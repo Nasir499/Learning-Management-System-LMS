@@ -35,7 +35,7 @@ function AdminDashboard() {
 	const dispatch = useDispatch();
 	const navigate = useNavigate();
 
-	const { allUserCount, subscribedCount } = useSelector(
+	const { allUserCount, instructorsCount, subscribedCount } = useSelector(
 		(state) => state.stat
 	);
 
@@ -44,12 +44,12 @@ function AdminDashboard() {
 	);
 
 	const userData = {
-		labels: ["Registered Users", "Enrolled Users"],
+		labels: ["Registered Users", "Instructors", "Enrolled Users"],
 		datasets: [
 			{
 				label: "User Details",
-				backgroundColor: ["yellow", "green"],
-				data: [allUserCount, subscribedCount],
+				backgroundColor: ["#EAB308", "#3B82F6", "#22C55E"],
+				data: [allUserCount, instructorsCount || 0, subscribedCount],
 				borderWidth: 1,
 			},
 		],
@@ -113,28 +113,39 @@ function AdminDashboard() {
 							<Pie data={userData} />
 						</div>
 
-						<div className="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full">
+						<div className="grid grid-cols-1 sm:grid-cols-3 gap-4 w-full">
 							<div className="flex items-center justify-between p-4 rounded-md shadow-md gap-3 bg-gray-800/60 hover:bg-gray-800 hover:-translate-y-1 transition-all duration-300 border border-gray-700/50">
 								<div className="flex flex-col items-start">
-									<p className="font-semibold text-sm sm:text-base text-gray-300">
+									<p className="font-semibold text-xs sm:text-sm text-gray-300">
 										Registered Users
 									</p>
-									<h3 className="text-2xl sm:text-4xl font-bold">
+									<h3 className="text-xl sm:text-3xl font-bold">
 										{allUserCount}
 									</h3>
 								</div>
-								<FaUsers className="text-yellow-500 text-3xl sm:text-5xl" />
+								<FaUsers className="text-yellow-500 text-2xl sm:text-4xl" />
 							</div>
 							<div className="flex items-center justify-between p-4 rounded-md shadow-md gap-3 bg-gray-800/60 hover:bg-gray-800 hover:-translate-y-1 transition-all duration-300 border border-gray-700/50">
 								<div className="flex flex-col items-start">
-									<p className="font-semibold text-sm sm:text-base text-gray-300">
+									<p className="font-semibold text-xs sm:text-sm text-gray-300">
+										Instructors
+									</p>
+									<h3 className="text-xl sm:text-3xl font-bold text-blue-400">
+										{instructorsCount || 0}
+									</h3>
+								</div>
+								<FaUsers className="text-blue-400 text-2xl sm:text-4xl" />
+							</div>
+							<div className="flex items-center justify-between p-4 rounded-md shadow-md gap-3 bg-gray-800/60 hover:bg-gray-800 hover:-translate-y-1 transition-all duration-300 border border-gray-700/50">
+								<div className="flex flex-col items-start">
+									<p className="font-semibold text-xs sm:text-sm text-gray-300">
 										Enrolled Users
 									</p>
-									<h3 className="text-2xl sm:text-4xl font-bold">
+									<h3 className="text-xl sm:text-3xl font-bold text-green-400">
 										{subscribedCount}
 									</h3>
 								</div>
-								<FaUsers className="text-green-500 text-3xl sm:text-5xl" />
+								<FaUsers className="text-green-500 text-2xl sm:text-4xl" />
 							</div>
 						</div>
 					</div>
@@ -164,8 +175,8 @@ function AdminDashboard() {
 									<p className="font-semibold text-sm sm:text-base text-gray-300">
 										Total Revenue
 									</p>
-									<h3 className="text-2xl sm:text-4xl font-bold">
-										{(allPayments?.count || 0) * 499}
+									<h3 className="text-2xl sm:text-4xl font-bold text-green-400">
+										₹ {((allPayments?.count || 0) * 499).toLocaleString()}
 									</h3>
 								</div>
 								<GiMoneyStack className="text-green-500 text-3xl sm:text-5xl" />

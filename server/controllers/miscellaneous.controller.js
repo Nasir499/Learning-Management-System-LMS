@@ -41,6 +41,7 @@ export const contactUs = async (req, res, next) => {
  */
 export const userStats = async (req, res, next) => {
   const allUsersCount = await User.countDocuments({ role: 'USER' });
+  const instructorsCount = await User.countDocuments({ role: 'INSTRUCTOR' });
 
   const subscribedUsersCount = await User.countDocuments({
     role: 'USER',
@@ -51,6 +52,7 @@ export const userStats = async (req, res, next) => {
     success: true,
     message: 'All registered users count',
     allUsersCount,
+    instructorsCount,
     subscribedUsersCount,
   });
 };
