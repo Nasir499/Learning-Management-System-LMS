@@ -75,7 +75,7 @@ function Displaylectures() {
           <div className='w-full lg:w-1/3 p-4 rounded-lg shadow-[0_0_10px_black] space-y-4 bg-gray-800/40 border border-gray-700'>
             <div className='font-semibold text-lg sm:text-xl text-yellow-500 flex flex-wrap items-center justify-between gap-2 pb-2 border-b border-gray-700'>
               <p>Lecture List</p>
-              {role === "ADMIN" && (
+              {(role === "ADMIN" || role === "INSTRUCTOR") && (
                 <button onClick={()=>navigate(`/course/addlecture`,{state:{...state}})} className='bg-green-500 text-black hover:bg-green-600 transition-all duration-300 px-3 py-1.5 rounded-md font-semibold text-xs sm:text-sm cursor-pointer'>
                   Add New Lecture
                 </button>
@@ -97,7 +97,7 @@ function Displaylectures() {
                     </span>
                   )}
                 </div>
-                {role === "ADMIN" && (
+                {(role === "ADMIN" || role === "INSTRUCTOR") && (
                   <button onClick={() => {
                     if (window.confirm('Delete this lecture? This action cannot be undone.')) {
                       onLectureDelete(state._id, lecture._id)
@@ -118,7 +118,7 @@ function Displaylectures() {
         (
           <div className='flex flex-col items-center justify-center gap-6 py-20'>
             <p className='text-center text-gray-300 text-lg'>No lectures available for this course yet.</p>
-            {role === "ADMIN" && (
+            {(role === "ADMIN" || role === "INSTRUCTOR") && (
               <button onClick={()=>navigate(`/course/addlecture`,{state:{...state}})} className='bg-green-500 text-black flex items-center justify-center hover:bg-green-600 duration-300 px-4 py-2 rounded-md font-semibold text-sm cursor-pointer'>
                 Add New Lecture
               </button>

@@ -14,7 +14,7 @@ router
   .route('/admin/stats/users')
   .get(isLoggedIn, authorizedRoles('ADMIN'), userStats);
 
-// Cloudinary signing endpoint for direct client uploads (ADMIN only)
-router.post('/cloudinary/sign', isLoggedIn, authorizedRoles('ADMIN'), signCloudinaryUpload);
+// Cloudinary signing endpoint for direct client uploads (ADMIN and INSTRUCTOR)
+router.post('/cloudinary/sign', isLoggedIn, authorizedRoles('ADMIN', 'INSTRUCTOR'), signCloudinaryUpload);
 
 export default router;

@@ -38,7 +38,7 @@ const authorizedSubscriber = async (req, res, next) => {
     const subscriptionStatus = req.user.subscription?.status;
     const currentUserRole = req.user.role;
 
-    if (currentUserRole !== 'ADMIN' && subscriptionStatus !== 'active') {
+    if (currentUserRole !== 'ADMIN' && currentUserRole !== 'INSTRUCTOR' && subscriptionStatus !== 'active') {
         return next(new AppError("Unauthorized, You don't have permission to access this resource", 403));
     }
     next();

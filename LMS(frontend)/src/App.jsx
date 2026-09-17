@@ -62,13 +62,16 @@ function App() {
           <Route path='/course/description' element={<CourseDescription />} />
           <Route path='/reset-password/:resetToken' element={<ResetPassword />} />
 
-          <Route element={<RequireAuth allowedRoles={['ADMIN']} />}>
+          <Route element={<RequireAuth allowedRoles={['ADMIN', 'INSTRUCTOR']} />}>
             <Route path='/course/create' element={<CreateCourse />} />
             <Route path='/course/addlecture' element={<AddLecture />} />
+          </Route>
+
+          <Route element={<RequireAuth allowedRoles={['ADMIN']} />}>
             <Route path='/admin/dashboard' element={<AdminDashboard />} />
           </Route>
 
-          <Route element={<RequireAuth allowedRoles={['ADMIN', 'USER']} />}>
+          <Route element={<RequireAuth allowedRoles={['ADMIN', 'USER', 'INSTRUCTOR']} />}>
             <Route path='/user/profile' element={<Profile />} />
             <Route path='/user/editprofile' element={<EditProfile />} />
             <Route path='/user/changepassword' element={<ChangePassword />} />

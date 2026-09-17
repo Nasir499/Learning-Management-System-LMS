@@ -22,8 +22,8 @@ const buySubscribtion = async (req, res, next) => {
         if (!user) {
             return next(new AppError("Unauthorized,please login", 401));
         }
-        if (user.role === 'ADMIN') {
-            return next(new AppError("Admins are not allowed to buy subscriptions", 401));
+        if (user.role === 'ADMIN' || user.role === 'INSTRUCTOR') {
+            return next(new AppError("Admins and Instructors are not allowed to buy subscriptions", 400));
         }
         const subscription = await razorpay.subscriptions.create({
             customer_notify: 1,
@@ -111,8 +111,8 @@ const cancelSubscription = async (req, res, next) => {
         if (!user) {
             return next(new AppError("Unauthorized,please login", 401));
         }
-        if (user.role === 'ADMIN') {
-            return next(new AppError("Admins are not allowed to cancel subscriptions", 401));
+        if (user.role === 'ADMIN' || user.role === 'INSTRUCTOR') {
+            return next(new AppError("Admins and Instructors are not allowed to cancel subscriptions", 400));
         }
         const subscriptionId = user.subscription.id;
 

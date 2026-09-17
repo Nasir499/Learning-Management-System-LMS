@@ -73,7 +73,7 @@ function HomeLayout({ children }) {
           {isLoggedIn && role === "ADMIN" && (
             <Link to="/admin/dashboard" className={isActive("/admin/dashboard") ? "text-yellow-500 font-bold border-b-2 border-yellow-500 pb-0.5" : "text-gray-200 hover:text-yellow-500 transition-colors"}>Admin Dashboard</Link>
           )}
-          {isLoggedIn && role === "ADMIN" && (
+          {isLoggedIn && (role === "ADMIN" || role === "INSTRUCTOR") && (
             <Link to="/course/create" className={isActive("/course/create") ? "text-yellow-500 font-bold border-b-2 border-yellow-500 pb-0.5" : "text-gray-200 hover:text-yellow-500 transition-colors"}>Create Course</Link>
           )}
           <Link to="/contact" className={isActive("/contact") ? "text-yellow-500 font-bold border-b-2 border-yellow-500 pb-0.5" : "text-gray-200 hover:text-yellow-500 transition-colors"}>Contact Us</Link>
@@ -137,7 +137,7 @@ function HomeLayout({ children }) {
                     </Link>
                   </li>
                 )}
-                {isLoggedIn && role === "ADMIN" && (
+                {isLoggedIn && (role === "ADMIN" || role === "INSTRUCTOR") && (
                   <li>
                     <Link to="/course/create" onClick={hideDrawer} className={`py-2 px-3 rounded-md transition-colors ${isActive("/course/create") ? "text-yellow-500 font-bold bg-gray-800" : "hover:bg-gray-800/60 text-gray-200"}`}>
                       Create Course
