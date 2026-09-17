@@ -19,10 +19,19 @@ const isLoggedIn = async (req, res, next) => {
         if (!user) {
             return next(new AppError("Unauthenticated, Please login again", 401));
         }
+
+        if (userDetails.sessionId) {
+            const isSessionActive = user.activeSessions?.some(session => session.sessionId === userDetails.sessionId);
+            if (!isSessionActive) {
+                return next(new AppError("Session expired or logged in from another device. (Max 2 devices allowed)", 401));
+            }
+        }
+
         req.user = user;
+        req.user.sessionId = userDetails.sessionId;
         next();
     } catch (error) {
-        return next(new AppError("Invalid or expired authentication token", 401));
+        return next(new AppError(error.message || "Invalid or expired authentication token", 401));
     }
 }
 

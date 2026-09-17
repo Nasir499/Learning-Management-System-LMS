@@ -74,11 +74,14 @@ const register = async (req, res, next) => {
       }
     }
 
+    const sessionId = crypto.randomUUID();
+    user.activeSessions = [{ sessionId, createdAt: new Date() }];
+
     await user.save();
 
     user.password = undefined;
 
-    const token = await user.generateJWTToken();
+    const token = await user.generateJWTToken(sessionId);
 
     res.cookie('token', token, cookieOptions)
 
@@ -115,11 +118,23 @@ const login = async (req, res,next) => {
       return next(new AppError("Email or password does not match", 400))
     }
 
-    const token = await user.generateJWTToken();
-    user.password = undefined
+    const sessionId = crypto.randomUUID();
+    if (!user.activeSessions) {
+      user.activeSessions = [];
+    }
+
+    // Limit active sessions to max 2 devices (evict oldest session if 3rd device logs in)
+    while (user.activeSessions.length >= 2) {
+      user.activeSessions.shift();
+    }
+
+    user.activeSessions.push({ sessionId, createdAt: new Date() });
+    await user.save();
+
+    const token = await user.generateJWTToken(sessionId);
+    user.password = undefined;
 
     res.cookie('token', token, cookieOptions);
-
 
     res.status(200).json({
       success: true,
@@ -133,20 +148,37 @@ const login = async (req, res,next) => {
   }
 }
 
-const logout = (req, res,next) => {
+const logout = async (req, res, next) => {
   try {
+    let token = req.cookies?.token;
+    if (!token && req.headers.authorization && req.headers.authorization.startsWith("Bearer")) {
+      token = req.headers.authorization.split(" ")[1];
+    }
+    if (token) {
+      try {
+        const userDetails = jwt.verify(token, process.env.JWT_SECRET);
+        if (userDetails?.id && userDetails?.sessionId) {
+          await User.findByIdAndUpdate(userDetails.id, {
+            $pull: { activeSessions: { sessionId: userDetails.sessionId } }
+          });
+        }
+      } catch (e) {
+        // Token might be expired or invalid
+      }
+    }
+
     res.cookie('token', null, {
       secure: isProduction,
       sameSite: isProduction ? 'none' : 'lax',
       maxAge: 0,
       httpOnly: true
-    })
+    });
     res.status(200).json({
       success: true,
       message: "User logged out successfully"
-    })
+    });
   } catch (error) {
-    return next(new AppError(error.message, 500))
+    return next(new AppError(error.message, 500));
   }
 }
 
@@ -157,7 +189,7 @@ const getProfile = async (req, res, next) => {
     let token;
 
     if (user && (user.role !== req.user.role || user.subscription?.status !== req.user.subscription?.status)) {
-        token = await user.generateJWTToken();
+        token = await user.generateJWTToken(req.user.sessionId);
         res.cookie('token', token, cookieOptions);
     }
 

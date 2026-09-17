@@ -45,7 +45,19 @@ const userSchema = new Schema({
     subscription: {
         id: String,
         status:String
-    }
+    },
+    activeSessions: [
+        {
+            sessionId: {
+                type: String,
+                required: true
+            },
+            createdAt: {
+                type: Date,
+                default: Date.now
+            }
+        }
+    ]
 
 }, { timestamps: true })
 
@@ -57,13 +69,14 @@ userSchema.pre('save', async function (next) {
 })
 
 userSchema.methods = {
-    generateJWTToken: async function () {
+    generateJWTToken: async function (sessionId) {
         return jwt.sign(
             {
                 id: this._id,
                 email: this.email,
                 subscription: this.subscription,
                 role: this.role,
+                sessionId: sessionId
             },
             process.env.JWT_SECRET,
             {
