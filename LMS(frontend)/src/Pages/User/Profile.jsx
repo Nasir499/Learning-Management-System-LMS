@@ -36,6 +36,13 @@ function Profile() {
                         <p className="font-semibold text-gray-300">Email:</p><p className="break-all">{userData?.email}</p>
                         <p className="font-semibold text-gray-300">Role:</p><p>{userData?.role}</p>
                         <p className="font-semibold text-gray-300">Subscription:</p><p>{userData?.subscription?.status === "active" ? "Active" : "Inactive"}</p>
+                        {userData?.role === 'INSTRUCTOR' && (
+                          <>
+                            <p className="font-semibold text-gray-300">Wallet Balance:</p><p className="font-bold text-green-400">₹ {(userData?.walletBalance || 0).toLocaleString()}</p>
+                            <p className="font-semibold text-gray-300">UPI ID:</p><p className="break-all">{userData?.bankDetails?.upiId || "Not added"}</p>
+                            <p className="font-semibold text-gray-300">Bank Account:</p><p>{userData?.bankDetails?.accountNumber || "Not added"}</p>
+                          </>
+                        )}
                     </div>
                     <div className="flex flex-col sm:flex-row items-center justify-between mt-2 gap-3">
                         <Link to="/user/changepassword" className="w-full sm:w-1/2 bg-yellow-600 hover:bg-yellow-500 transition-all ease-in-out duration-300 rounded-sm font-semibold py-2 cursor-pointer text-center">

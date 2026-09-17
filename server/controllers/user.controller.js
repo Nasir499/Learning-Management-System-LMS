@@ -332,6 +332,15 @@ const updateUser = async (req, res,next) => {
     user.fullName = fullName
   }
 
+  if (req.body.upiId || req.body.accountNumber || req.body.ifscCode || req.body.accountHolderName) {
+    user.bankDetails = {
+      upiId: req.body.upiId || user.bankDetails?.upiId || "",
+      accountNumber: req.body.accountNumber || user.bankDetails?.accountNumber || "",
+      ifscCode: req.body.ifscCode || user.bankDetails?.ifscCode || "",
+      accountHolderName: req.body.accountHolderName || user.bankDetails?.accountHolderName || ""
+    };
+  }
+
   if(req.file){
     await cloudinary.v2.uploader.destroy(user.avatar.public_id);
 

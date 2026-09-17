@@ -76,8 +76,12 @@ const authorizedSubscriber = async (req, res, next) => {
         }
     }
 
+    if (courseId && req.user.enrolledCourses?.some(c => c.courseId.toString() === courseId.toString())) {
+        return next();
+    }
+
     if (subscriptionStatus !== 'active') {
-        return next(new AppError("Unauthorized, Please subscribe to access this course lectures", 403));
+        return next(new AppError("Unauthorized, Please purchase or subscribe to access this course lectures", 403));
     }
     next();
 }

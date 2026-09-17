@@ -91,7 +91,7 @@ const createCourse = async (req, res, next) => {
     // Implementation for creating a course
     // This function is not defined in the provided code snippet
     // You can add your logic here
-    const { title, description, category, createdBy } = req.body;
+    const { title, description, category, createdBy, price } = req.body;
 
     if (!title || !description || !category || !createdBy) {
         return next(new AppError("All fields are required", 400));
@@ -102,6 +102,7 @@ const createCourse = async (req, res, next) => {
         description,
         category,
         createdBy,
+        price: price !== undefined && price !== "" ? Number(price) : 499,
         thumbnail: {
             public_id: "dummy",
             secure_url: "dummy"

@@ -1,5 +1,7 @@
 import { razorpay } from '../server.js';
 import User from '../models/user.model.js'
+import Course from '../models/course.model.js';
+import Payout from '../models/payout.model.js';
 import AppError from '../utils/error.util.js';
 import Payment from '../models/payment.model.js';
 import crypto from 'crypto';
@@ -101,6 +103,154 @@ const verifySubscription = async (req, res, next) => {
         success: true,
         message: "Subscription verified successfully",
     });
+}
+
+const buyCourseOrder = async (req, res, next) => {
+    try {
+        const { courseId } = req.params;
+        const course = await Course.findById(courseId);
+        if (!course) {
+            return next(new AppError("Course not found", 404));
+        }
+
+        const options = {
+            amount: (course.price || 499) * 100, // Amount in paise
+            currency: "INR",
+            receipt: `receipt_${courseId}_${Date.now()}`
+        };
+
+        const order = await razorpay.orders.create(options);
+
+        res.status(200).json({
+            success: true,
+            message: "Course order created successfully",
+            order,
+            course
+        });
+    } catch (error) {
+        console.error("buyCourseOrder error:", error);
+        return next(new AppError("Failed to create course order", 500));
+    }
+}
+
+const verifyCourseOrder = async (req, res, next) => {
+    try {
+        const { id } = req.user;
+        const { razorpay_payment_id, razorpay_order_id, razorpay_signature, courseId } = req.body;
+
+        if (!razorpay_payment_id || !razorpay_order_id || !razorpay_signature || !courseId) {
+            return next(new AppError("Payment details are missing", 400));
+        }
+
+        const user = await User.findById(id);
+        const course = await Course.findById(courseId);
+
+        if (!user || !course) {
+            return next(new AppError("User or Course not found", 404));
+        }
+
+        const generatedSignature = crypto
+            .createHmac('sha256', process.env.RAZORPAY_SECRET)
+            .update(`${razorpay_order_id}|${razorpay_payment_id}`)
+            .digest('hex');
+
+        if (generatedSignature !== razorpay_signature) {
+            return next(new AppError("Payment signature verification failed", 400));
+        }
+
+        // Record Payment
+        await Payment.create({
+            razorpay_payment_id,
+            razorpay_subscription_id: razorpay_order_id,
+            razorpay_signature,
+        });
+
+        // Add course to user's enrolledCourses
+        const alreadyEnrolled = user.enrolledCourses?.some(c => c.courseId.toString() === courseId);
+        if (!alreadyEnrolled) {
+            if (!user.enrolledCourses) user.enrolledCourses = [];
+            user.enrolledCourses.push({
+                courseId: course._id,
+                paymentId: razorpay_payment_id,
+                purchasedAt: new Date()
+            });
+            await user.save();
+        }
+
+        // Find Instructor (Course Creator) to credit wallet (80%) and log Payout
+        const courseCreatorName = course.createdBy?.trim().toLowerCase();
+        const instructor = await User.findOne({
+            $or: [
+                { fullName: { $regex: new RegExp(`^${courseCreatorName}$`, 'i') } },
+                { email: { $regex: new RegExp(`^${courseCreatorName}$`, 'i') } }
+            ]
+        });
+
+        if (instructor) {
+            const coursePrice = course.price || 499;
+            const instructorEarnings = Math.round(coursePrice * 0.80 * 100) / 100;
+            const adminCommission = Math.round(coursePrice * 0.20 * 100) / 100;
+
+            instructor.walletBalance = (instructor.walletBalance || 0) + instructorEarnings;
+            await instructor.save();
+
+            await Payout.create({
+                instructor: instructor._id,
+                course: course._id,
+                coursePrice,
+                instructorEarnings,
+                adminCommission,
+                status: 'PENDING'
+            });
+        }
+
+        res.status(200).json({
+            success: true,
+            message: "Course purchased successfully",
+        });
+    } catch (error) {
+        console.error("verifyCourseOrder error:", error);
+        return next(new AppError("Failed to verify course payment", 500));
+    }
+}
+
+const getAllPayoutsAdmin = async (req, res, next) => {
+    try {
+        const payouts = await Payout.find()
+            .populate('instructor', 'fullName email bankDetails walletBalance')
+            .populate('course', 'title price')
+            .sort({ createdAt: -1 });
+
+        res.status(200).json({
+            success: true,
+            payouts
+        });
+    } catch (error) {
+        return next(new AppError("Failed to fetch payouts", 500));
+    }
+}
+
+const markPayoutPaidAdmin = async (req, res, next) => {
+    try {
+        const { payoutId } = req.params;
+        const payout = await Payout.findById(payoutId);
+
+        if (!payout) {
+            return next(new AppError("Payout record not found", 404));
+        }
+
+        payout.status = 'PAID';
+        payout.paidAt = new Date();
+        await payout.save();
+
+        res.status(200).json({
+            success: true,
+            message: "Payout marked as PAID successfully",
+            payout
+        });
+    } catch (error) {
+        return next(new AppError("Failed to update payout status", 500));
+    }
 }
 
 const cancelSubscription = async (req, res, next) => {
@@ -225,6 +375,9 @@ export {
     getRazorpayKey,
     buySubscribtion,
     verifySubscription,
+    buyCourseOrder,
+    verifyCourseOrder,
+    getAllPayoutsAdmin,
+    markPayoutPaidAdmin,
     cancelSubscription,
 }
-

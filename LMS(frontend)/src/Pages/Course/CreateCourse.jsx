@@ -16,6 +16,7 @@ function CreateCourse() {
         title:"",
         category:"",
         createdBy: data?.fullName || "",
+        price: 499,
         description:"",
         thumbnail:null,
         previewImage:""
@@ -46,7 +47,7 @@ function CreateCourse() {
 
     async function onFormSubmit(e){
         e.preventDefault();
-        if(!userInput.title || !userInput.category || !userInput.createdBy || !userInput.description || !userInput.thumbnail) {
+        if(!userInput.title || !userInput.category || !userInput.createdBy || !userInput.price || !userInput.description || !userInput.thumbnail) {
             // Handle form validation error
             toast.error("Please fill in all fields");
             return;
@@ -58,7 +59,8 @@ function CreateCourse() {
             setUserInput({
                 title: "",
                 category: "",
-                createdBy: "",
+                createdBy: data?.fullName || "",
+                price: 499,
                 description: "",
                 thumbnail: null,
                 previewImage: ""
@@ -159,6 +161,22 @@ function CreateCourse() {
                                 placeholder="Enter course Category"
                                 className="bg-transparent px-3 py-2 border border-gray-600 rounded-md w-full focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 focus:outline-none transition-all"
                                 value={userInput.category}
+                                onChange={handleUserInput}
+                                />
+                            </div>
+                            <div className="flex flex-col gap-1">
+                                <label className="text-lg font-semibold text-gray-200" htmlFor="price" >
+                                      Course Price (₹)
+                                </label>
+                                <input
+                                type="number"
+                                required
+                                min="0"
+                                name="price"
+                                id="price"
+                                placeholder="Enter course price e.g. 999"
+                                className="bg-transparent px-3 py-2 border border-gray-600 rounded-md w-full focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 focus:outline-none transition-all"
+                                value={userInput.price}
                                 onChange={handleUserInput}
                                 />
                             </div>

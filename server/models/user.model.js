@@ -57,6 +57,29 @@ const userSchema = new Schema({
                 default: Date.now
             }
         }
+    ],
+    bankDetails: {
+        accountNumber: String,
+        ifscCode: String,
+        upiId: String,
+        accountHolderName: String
+    },
+    walletBalance: {
+        type: Number,
+        default: 0
+    },
+    enrolledCourses: [
+        {
+            courseId: {
+                type: Schema.Types.ObjectId,
+                ref: 'Course'
+            },
+            purchasedAt: {
+                type: Date,
+                default: Date.now
+            },
+            paymentId: String
+        }
     ]
 
 }, { timestamps: true })

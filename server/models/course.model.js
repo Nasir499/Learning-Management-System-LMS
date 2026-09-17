@@ -54,6 +54,11 @@ const courseSchema = new Schema({
         required: [true, "CreatedBy is required"],
         trim: true
     },
+    price: {
+        type: Number,
+        default: 499,
+        min: [0, "Price cannot be negative"]
+    },
 }, { timestamps: true });
 
 const Course = model('Course', courseSchema);

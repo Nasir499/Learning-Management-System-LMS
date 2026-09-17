@@ -1,5 +1,16 @@
 import { Router } from "express";
-import { allPayments, buySubscribtion, cancelSubscription, getRazorpayKey, razorpayWebhook, verifySubscription } from "../controllers/payment.controller.js";
+import {
+    allPayments,
+    buySubscribtion,
+    cancelSubscription,
+    getRazorpayKey,
+    razorpayWebhook,
+    verifySubscription,
+    buyCourseOrder,
+    verifyCourseOrder,
+    getAllPayoutsAdmin,
+    markPayoutPaidAdmin
+} from "../controllers/payment.controller.js";
 import {isLoggedIn,authorizedRoles} from "../middlewares/auth.middleware.js";
 const router = Router();
 
@@ -27,6 +38,32 @@ router.route('/unsubscribe')
     .post(
         isLoggedIn,
         cancelSubscription
+    )
+
+router.route('/course-order/:courseId')
+    .post(
+        isLoggedIn,
+        buyCourseOrder
+    )
+
+router.route('/verify-course')
+    .post(
+        isLoggedIn,
+        verifyCourseOrder
+    )
+
+router.route('/admin/payouts')
+    .get(
+        isLoggedIn,
+        authorizedRoles('ADMIN'),
+        getAllPayoutsAdmin
+    )
+
+router.route('/admin/payouts/:payoutId/pay')
+    .put(
+        isLoggedIn,
+        authorizedRoles('ADMIN'),
+        markPayoutPaidAdmin
     )
 
 router.route('/')
