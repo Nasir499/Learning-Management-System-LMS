@@ -2,6 +2,38 @@ import User from '../models/user.model.js';
 import AppError from '../utils/error.util.js';
 import sendEmail from '../utils/sendEmail.js';
 import cloudinary from 'cloudinary';
+import mongoose from 'mongoose';
+
+/**
+ * @HEALTH_CHECK
+ * @ROUTE @GET {{URL}}/api/v1/health
+ * @ACCESS Public
+ */
+export const healthCheck = async (req, res, next) => {
+  try {
+    const dbState = mongoose.connection.readyState;
+    const dbStatus = dbState === 1 ? 'CONNECTED' : dbState === 2 ? 'CONNECTING' : 'DISCONNECTED';
+
+    const healthInfo = {
+      status: dbState === 1 ? 'OK' : 'DEGRADED',
+      timestamp: new Date().toISOString(),
+      uptime: `${Math.floor(process.uptime())}s`,
+      environment: process.env.NODE_ENV || 'development',
+      database: {
+        status: dbStatus,
+        name: mongoose.connection.name || 'N/A'
+      }
+    };
+
+    if (dbState !== 1) {
+      return res.status(500).json({ success: false, ...healthInfo });
+    }
+
+    return res.status(200).json({ success: true, ...healthInfo });
+  } catch (error) {
+    return next(new AppError('Health check failed: ' + error.message, 500));
+  }
+};
 
 /**
  * @CONTACT_US
